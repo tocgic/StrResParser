@@ -95,6 +95,7 @@ public class UnionStResExcel implements IResourceTransform {
             sheet.setColumnWidth(indexCol, column.getCellLength() * 256);//셀의 너비 (1글자:256)
 
             cell = row.createCell(indexCol++);
+            cell.setCellType(CellType.STRING);
             cell.setCellStyle(styleHeader);
             cell.setCellValue(column.getValue());
         }
@@ -164,7 +165,6 @@ public class UnionStResExcel implements IResourceTransform {
         styleLock = workbook.createCellStyle();
         styleLock.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
         styleLock.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        styleLock.setWrapText(true);
         styleLock.setAlignment(HorizontalAlignment.LEFT);
     }
 
@@ -173,6 +173,7 @@ public class UnionStResExcel implements IResourceTransform {
         for (ExportXlsColumn column : columns) {
             XSSFCell cell = row.createCell(indexCol++);
             cell.setCellStyle(styleBody);
+            cell.setCellType(CellType.STRING);
             String value = "";
             switch (column) {
                 case HIDDEN_KEYS:
