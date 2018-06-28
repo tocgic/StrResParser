@@ -1,7 +1,9 @@
 package kr.pe.tocgic.tools.file.platform;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import kr.pe.tocgic.tools.functions.IResourceString;
 import kr.pe.tocgic.tools.util.Logger;
+import kr.pe.tocgic.tools.util.StringUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -58,6 +60,12 @@ public class AndroidXml extends BaseStringResFile implements IResourceString {
                     Node stringNode = stringNodeList.item(i);
                     Element stringElement = (Element) stringNode;
                     String key = stringElement.getAttribute("name");
+                    String translatable = stringElement.getAttribute("translatable");
+                    if (StringUtil.isNotEmpty(translatable)) {
+                        if (!Boolean.parseBoolean(translatable)) {
+                            continue;
+                        }
+                    }
                     String value = stringNode.getTextContent();
                     map.put(key, value);
                 }
