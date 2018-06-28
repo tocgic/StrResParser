@@ -1,5 +1,6 @@
 package kr.pe.tocgic.tools.file;
 
+import kr.pe.tocgic.tools.data.LanguageModel;
 import kr.pe.tocgic.tools.data.ResourceDataManager;
 import kr.pe.tocgic.tools.data.ResourceModel;
 import kr.pe.tocgic.tools.data.enums.ExportXlsColumn;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +36,20 @@ public class UnionStResExcel implements IResourceTransform {
     private Platform[] platforms;
     private CellStyle styleHeader;
     private CellStyle styleBody;
+    private CellStyle styleLock;
+    private boolean isIgnoreEmptyString;
+
+    private int columnIndexHiddenKeys, columnIndexKey, columnIndexPlatform;
+
 
     public UnionStResExcel(ExportXlsColumn[] columns) {
         this.columns = columns;
         platforms = Platform.values();
+    }
+
+    public UnionStResExcel(ExportXlsColumn[] columns, boolean isIgnoreEmptyString) {
+        this(columns);
+        this.isIgnoreEmptyString = isIgnoreEmptyString;
     }
 
     @Override
@@ -70,6 +82,12 @@ public class UnionStResExcel implements IResourceTransform {
 
         //Key 컬럼 포함 여부
         boolean isContainsColumnKey = false;
+        for (ExportXlsColumn column : columns) {
+            if (column == ExportXlsColumn.KEY) {
+                isContainsColumnKey = true;
+                break;
+            }
+        }
 
         //make Header
         row = sheet.createRow((short)indexRow++);
@@ -79,14 +97,13 @@ public class UnionStResExcel implements IResourceTransform {
             cell = row.createCell(indexCol++);
             cell.setCellStyle(styleHeader);
             cell.setCellValue(column.getValue());
-
-            if (column == ExportXlsColumn.KEY) {
-                isContainsColumnKey = true;
-            }
         }
 
         //make body
         for (ResourceModel model : data) {
+            if (isIgnoreEmptyString && model.getLanguageModel().isEmpty()) {
+                continue;
+            }
             if (isContainsColumnKey) {
                 for (Platform platform : platforms) {
                     List<String> keys = model.getKeyList(platform);
@@ -143,6 +160,12 @@ public class UnionStResExcel implements IResourceTransform {
         styleBody.setWrapText(true);
         styleBody.setAlignment(HorizontalAlignment.LEFT);
 
+        //CellStyle Lock
+        styleLock = workbook.createCellStyle();
+        styleLock.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+        styleLock.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        styleLock.setWrapText(true);
+        styleLock.setAlignment(HorizontalAlignment.LEFT);
     }
 
     private void fillColumn(XSSFRow row, String key, Platform platform, ResourceModel model) {
@@ -152,6 +175,12 @@ public class UnionStResExcel implements IResourceTransform {
             cell.setCellStyle(styleBody);
             String value = "";
             switch (column) {
+                case HIDDEN_KEYS:
+                    cell.setCellStyle(styleLock);
+                    if (model != null) {
+                        value = getHiddenKeys(model);
+                    }
+                    break;
                 case KEY:
                     if (key != null) {
                         value = key;
@@ -159,7 +188,7 @@ public class UnionStResExcel implements IResourceTransform {
                     break;
                 case PLATFORM:
                     if (platform != null) {
-                        value = platform.getValue();
+                        value = platform.toString();
                     }
                     break;
                 case LANGUAGE_KO:
@@ -182,19 +211,75 @@ public class UnionStResExcel implements IResourceTransform {
         }
     }
 
-    private void parseHeaderColumns(Map<Language, Integer> target, Row row) throws Exception {
+    private static final String TOKEN_ITEM = "^:^";
+    private static final String REGEX_TOKEN_ITEM = "\\^:\\^";
+
+    /**
+     * {Platform}{keyValue}{TOKEN_ITEM}{Platform}{keyValue}{TOKEN_ITEM}...
+     * @param model
+     * @return
+     */
+    private String getHiddenKeys(ResourceModel model) {
+        StringBuilder keys = new StringBuilder();
+        if (model != null) {
+            List<String> keyPlatformList = new ArrayList<>();
+            for (Platform platform : Platform.values()) {
+                List<String> keyList = model.getKeyList(platform);
+                for (String key : keyList) {
+                    keyPlatformList.add(platform + key);
+                }
+            }
+            int size = keyPlatformList.size();
+            for (int i = 0; i < size; i++) {
+                keys.append(keyPlatformList.get(i));
+                if (i + 1 < size) {
+                    keys.append(TOKEN_ITEM);
+                }
+            }
+        }
+        return keys.toString();
+    }
+
+    private Map<Platform, List<String>> getHiddenKeyMap(String keyPlatformString) {
+        Map<Platform, List<String>> map = new HashMap<>();
+
+        String[] items = keyPlatformString.split(REGEX_TOKEN_ITEM);
+        for (String item : items) {
+            if (StringUtil.isEmpty(item)) {
+                continue;
+            }
+            for (Platform platform : Platform.values()) {
+                if (item.startsWith(platform.toString())) {
+                    List<String> list = map.get(platform);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        map.put(platform, list);
+                    }
+                    String keyValue = item.substring(platform.toString().length());
+                    if (StringUtil.isNotEmpty(keyValue)) {
+                        list.add(keyValue);
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
+    private ExportXlsColumn.ParseType parseHeaderColumns(Map<Language, Integer> target, Row row) throws Exception {
         if (target == null || row == null) {
             throw new Exception("parseHeaderColumns(), invalid parameter");
         }
         target.clear();
 
-        ExportXlsColumn[] columns = ExportXlsColumn.values();
+        List<ExportXlsColumn> columns = new ArrayList<>();
         int cellSize = row.getPhysicalNumberOfCells();
         for (int index = 0; index < cellSize; index++) {
             String value = row.getCell(index).getStringCellValue();
             if (StringUtil.isNotEmpty(value)) {
-                for (ExportXlsColumn column : columns) {
+                for (ExportXlsColumn column : ExportXlsColumn.values()) {
                     if (value.equals(column.getValue())) {
+                        columns.add(column);
+
                         Language language = column.getLanguage();
                         if (language != null) {
                             target.put(language, index);
@@ -204,6 +289,19 @@ public class UnionStResExcel implements IResourceTransform {
                 }
             }
         }
+
+        ExportXlsColumn.ParseType parseType;
+        if (columns.contains(ExportXlsColumn.HIDDEN_KEYS)) {
+            parseType = ExportXlsColumn.ParseType.HIDDEN_KEY;
+            columnIndexHiddenKeys = columns.indexOf(ExportXlsColumn.HIDDEN_KEYS);
+        } else if (columns.contains(ExportXlsColumn.KEY) && columns.contains(ExportXlsColumn.PLATFORM)){
+            parseType = ExportXlsColumn.ParseType.KEY;
+            columnIndexKey = columns.indexOf(ExportXlsColumn.KEY);
+            columnIndexPlatform = columns.indexOf(ExportXlsColumn.PLATFORM);
+        } else {
+            parseType = ExportXlsColumn.ParseType.VALUE;
+        }
+        return parseType;
     }
 
     @Override
@@ -248,30 +346,26 @@ public class UnionStResExcel implements IResourceTransform {
                 return false;
             }
             //parse Header
-            parseHeaderColumns(cellIndexMapByLanguage, curSheet.getRow(0));
+            ExportXlsColumn.ParseType parseType = parseHeaderColumns(cellIndexMapByLanguage, curSheet.getRow(0));
             if (cellIndexMapByLanguage.size() < 1) {
                 Logger.e(TAG, "importFile() Fail. header parse error. Not match format with UnionStResExcel file type.");
                 return false;
             }
+
             //parse Body
             for (int rowIndex = 1; rowIndex < rowSize; rowIndex++) {
                 curRow = curSheet.getRow(rowIndex);
 
-                //기본 언어에 대한 StringValue
-                Cell curCell = curRow.getCell(cellIndexMapByLanguage.get(langDefault));
-                String langDefValue = curCell != null ? curCell.getStringCellValue() : "";
-                if (StringUtil.isNotEmpty(langDefValue)) {
-                    for (Language language : cellIndexMapByLanguage.keySet()) {
-                        if (language.isDefault()) {
-                            continue;
-                        }
-                        Cell langCell = curRow.getCell(cellIndexMapByLanguage.get(language));
-                        String langValue = langCell != null ? langCell.getStringCellValue() : "";
-                        boolean updateResult = target.updateValue(langDefault, langDefValue, language, langValue);
-                        if (!updateResult) {
-                            Logger.w(TAG, "ResourceDataManager.updateValue() Fail. "+langDefValue+"["+langDefault+"], "+langValue+"["+language+"]");
-                        }
-                    }
+                switch (parseType) {
+                    case HIDDEN_KEY:
+                        parseByHiddenKeys(curRow, cellIndexMapByLanguage, target);
+                        break;
+                    case KEY:
+                        parseByKeyPlatform(curRow, cellIndexMapByLanguage, target);
+                        break;
+                    case VALUE:
+                        parseByValue(curRow, cellIndexMapByLanguage, langDefault, target);
+                        break;
                 }
             }
             return true;
@@ -285,6 +379,102 @@ public class UnionStResExcel implements IResourceTransform {
                 if( fis!= null) fis.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private LanguageModel getLanguageModel(Row curRow, Map<Language, Integer> cellIndexMapByLanguage) {
+        LanguageModel languageModel = new LanguageModel();
+        if (curRow == null || cellIndexMapByLanguage == null) {
+            Logger.e(TAG, "getLanguageModel() Fail. parameter error.");
+            return languageModel;
+        }
+
+        for (Language language : cellIndexMapByLanguage.keySet()) {
+            Cell langCell = curRow.getCell(cellIndexMapByLanguage.get(language));
+            String langValue = langCell == null ? "" : langCell.getStringCellValue();
+            if (isIgnoreEmptyString && langCell == null) {
+                continue;
+            }
+            languageModel.setValue(language, langValue);
+        }
+        return languageModel;
+    }
+
+    private void parseByKeyPlatform(Row curRow, Map<Language, Integer> cellIndexMapByLanguage, ResourceDataManager target) {
+        if (target == null || curRow == null) {
+            Logger.e(TAG, "parseByKeyPlatform() Fail. parameter error.");
+            return;
+        }
+
+        try {
+            Cell cellKey = curRow.getCell(columnIndexKey);
+            Cell cellPlatform = curRow.getCell(columnIndexPlatform);
+            String key = cellKey.getStringCellValue();
+            Platform platform = Platform.valueOf(cellPlatform.getStringCellValue());
+
+            LanguageModel languageModel = getLanguageModel(curRow, cellIndexMapByLanguage);
+
+            target.updateByKeyPlatform(platform, key, languageModel);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Logger.e(TAG, "parseByKeyPlatform(), e:"+e.getMessage());
+        }
+    }
+
+    private void parseByHiddenKeys(Row curRow, Map<Language, Integer> cellIndexMapByLanguage, ResourceDataManager target) {
+        if (target == null || curRow == null) {
+            Logger.e(TAG, "parseByHiddenKeys() Fail. parameter error.");
+            return;
+        }
+
+        Cell cellHiddenKeys = curRow.getCell(columnIndexHiddenKeys);
+        if (cellHiddenKeys == null) {
+            Logger.e(TAG, "parseByHiddenKeys() Fail. Cell not found [cellHiddenKeys].");
+            return;
+        }
+
+        String keyPlatformString = cellHiddenKeys.getStringCellValue();
+        Map<Platform, List<String>> map = getHiddenKeyMap(keyPlatformString);
+        if (map.size() > 0) {
+            LanguageModel languageModel = getLanguageModel(curRow, cellIndexMapByLanguage);
+
+            for (Platform platform : map.keySet()) {
+                List<String> keyList = map.get(platform);
+                if (keyList != null) {
+                    for (String key : keyList) {
+                        target.updateByKeyPlatform(platform, key, languageModel);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param curRow
+     * @param cellIndexMapByLanguage
+     * @param langDefault
+     * @param target
+     */
+    private void parseByValue(Row curRow, Map<Language, Integer> cellIndexMapByLanguage, Language langDefault, ResourceDataManager target) {
+        //기본 언어에 대한 StringValue
+        Cell curCell = curRow.getCell(cellIndexMapByLanguage.get(langDefault));
+        String langDefValue = curCell != null ? curCell.getStringCellValue() : "";
+        if (StringUtil.isNotEmpty(langDefValue)) {
+            for (Language language : cellIndexMapByLanguage.keySet()) {
+                if (language.isDefault()) {
+                    continue;
+                }
+                Cell langCell = curRow.getCell(cellIndexMapByLanguage.get(language));
+                String langValue = langCell == null ? "" : langCell.getStringCellValue();
+                if (isIgnoreEmptyString && langCell == null) {
+                    continue;
+                }
+                boolean updateResult = target.updateValue(langDefault, langDefValue, language, langValue);
+                if (!updateResult) {
+                    Logger.w(TAG, "ResourceDataManager.updateValue() Fail. " + langDefValue + "[" + langDefault + "], " + langValue + "[" + language + "]");
+                }
             }
         }
     }

@@ -82,7 +82,7 @@ public class UnionStResXml implements IResourceTransform {
                 for (Platform platform : Platform.values()) {
                     List<String> keys = model.getKeyList(platform);
                     for (String key : keys) {
-                        Element childItem = createSingleNode(document, TAG_KEY, ATTR_PLATFORM, platform.getValue(), key);
+                        Element childItem = createSingleNode(document, TAG_KEY, ATTR_PLATFORM, platform.toString(), key);
                         if (childItem != null) {
                             item.appendChild(childItem);
                         }

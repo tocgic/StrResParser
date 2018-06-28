@@ -14,6 +14,7 @@ import kr.pe.tocgic.tools.util.StringUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -105,9 +106,10 @@ public class StResManager {
      * @param target 생성 파일
      * @param overWrite 덮어쓰기 여부
      * @param columns 생성시 포함 할 컬럼 정보 (null : 전체 표시)
+     * @param isIgnoreEmptyString 모두(ko, en, ja..) 비어있는 리소스 의 경우 무시 여부
      * @return
      */
-    public boolean makeExcel(File target, boolean overWrite, ExportXlsColumn[] columns) {
+    public boolean makeExcel(File target, boolean overWrite, ExportXlsColumn[] columns, boolean isIgnoreEmptyString) {
         if (target == null) {
             Logger.e(TAG, "Can NOT make UnionStResExcel file. target is Null.");
             return false;
@@ -121,9 +123,11 @@ public class StResManager {
             }
         }
         if (columns == null) {
-            columns = ExportXlsColumn.values();
+            List<ExportXlsColumn> list = new ArrayList<>(Arrays.asList(ExportXlsColumn.values()));
+            list.remove(ExportXlsColumn.HIDDEN_KEYS);
+            columns = list.toArray(new ExportXlsColumn[0]);
         }
-        UnionStResExcel unionStResExcel = new UnionStResExcel(columns);
+        UnionStResExcel unionStResExcel = new UnionStResExcel(columns, isIgnoreEmptyString);
         boolean result = unionStResExcel.exportFile(resourceDataManager, target);
         Logger.i(TAG, "make UnionStResExcel(" + target.getAbsolutePath()+ ") result : " + result);
         return result;
@@ -132,14 +136,15 @@ public class StResManager {
     /**
      * UnionStResExcel 포멧의 xlsx 파일 데이터 import
      * @param source
+     * @param isIgnoreEmptyString 각 Language(ko, en, ja..) 별 비어있는 리소스 의 경우 무시 여부
      * @return
      */
-    public boolean importFromExcel(File source) {
+    public boolean importFromExcel(File source, boolean isIgnoreEmptyString) {
         if (source == null || !source.exists()) {
             Logger.e(TAG, "importFromExcel() Fail. source is not exist.");
             return false;
         }
-        UnionStResExcel unionStResExcel = new UnionStResExcel(null);
+        UnionStResExcel unionStResExcel = new UnionStResExcel(null, isIgnoreEmptyString);
         boolean result = unionStResExcel.importFile(source, resourceDataManager);
         Logger.i(TAG, "import UnionStResExcel(" + source.getAbsolutePath()+ ") result : " + result);
         return result;

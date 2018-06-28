@@ -2,9 +2,11 @@ package kr.pe.tocgic.tools.data;
 
 import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.util.Logger;
+import kr.pe.tocgic.tools.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class LanguageModel {
     private static final String TAG = LanguageModel.class.getSimpleName();
@@ -21,9 +23,13 @@ public class LanguageModel {
     }
 
     public boolean setValue(Language language, String value) {
+        return setValue(language, value, false);
+    }
+
+    public boolean setValue(Language language, String value, boolean isForce) {
         String newValue = value != null ? value : "";
         String oldValue = getValue(language);
-        if (oldValue == null) {
+        if (oldValue == null || isForce) {
             valueMap.put(language, newValue);
             return true;
         } else {
@@ -35,6 +41,22 @@ public class LanguageModel {
             }
             return false;
         }
+    }
+
+    public Set<Language> getLanguages() {
+        return valueMap.keySet();
+    }
+
+    public boolean isEmpty() {
+        if (valueMap.size() < 1) {
+            return true;
+        }
+        for (Language language : valueMap.keySet()) {
+            if (StringUtil.isNotEmpty(valueMap.get(language))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

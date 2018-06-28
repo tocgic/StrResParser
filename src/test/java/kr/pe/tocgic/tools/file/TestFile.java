@@ -36,17 +36,6 @@ public class TestFile {
         }
     }
 
-    void makeTotalStResXml(ResourceDataManager data, String targetFileFullPath) {
-
-        UnionStResXml unionStResXml = new UnionStResXml();
-        File target = new File(targetFileFullPath);
-        if (target.exists()) {
-            target.delete();
-        }
-        boolean result = unionStResXml.exportFile(data, target);
-        Logger.i("TEST", "result : " + result);
-    }
-
     @Test
     public void test() {
         ResourceDataManager resourceDataManager = new ResourceDataManager();
@@ -76,9 +65,11 @@ public class TestFile {
 
         //export, union string resource
         manager.makeUnionStResXml(new File("/Users/tocgic/Temp/unionStRes.xml"), true);
-        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null);
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null, true);
         ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/unionStResOnlyString.xlsx"), true, columns);
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes_onlyString.xlsx"), true, columns, true);
+        ExportXlsColumn[] columns2 = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes_hiddenKeys.xlsx"), true, columns2, true);
 
 
 //        //import, platform string resources
@@ -103,18 +94,15 @@ public class TestFile {
         manager.setImportResourceDirectory(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
         manager.importPlatformResources();
 
-        //export, union string resource
-        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/unionStRes.xml"), true);
-        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null);
-        ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/unionStResOnlyString.xlsx"), true, columns);
-
-        //update, string resource from xlxs file
-        manager.importFromExcel(new File("/Users/tocgic/Temp/unionStResOnlyString_edit.xlsx"));
+        //update, string resource from xlsx file
+        manager.importFromExcel(new File("/Users/tocgic/Temp/unionStRes_hiddenKeys_edit.xlsx"), true);
 
         //export, updated union string resource
         manager.makeUnionStResXml(new File("/Users/tocgic/Temp/unionStRes.xml"), true);
-        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null);
-        manager.makeExcel(new File("/Users/tocgic/Temp/unionStResOnlyString.xlsx"), true, columns);
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null, true);
+        ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes_onlyString.xlsx"), true, columns, true);
+        ExportXlsColumn[] columns2 = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes_hiddenKeys.xlsx"), true, columns2, true);
     }
 }

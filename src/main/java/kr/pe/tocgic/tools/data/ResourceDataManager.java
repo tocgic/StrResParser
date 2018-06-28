@@ -105,6 +105,17 @@ public class ResourceDataManager {
         return false;
     }
 
+    public boolean updateByKeyPlatform(Platform platform, String key, LanguageModel languageModel) {
+        LanguageModel stored = getLanguageModel(platform, key);
+        for (Language language : languageModel.getLanguages()) {
+            String value = languageModel.getValue(language, null);
+            if (value != null) {
+                stored.setValue(language, value, true);
+            }
+        }
+        return true;
+    }
+
     private List<LanguageModel> getLanguageModesByValue(Language language, String value) {
         List<LanguageModel> target = new ArrayList<>();
         for (Platform platform : platformMapMap.keySet()) {

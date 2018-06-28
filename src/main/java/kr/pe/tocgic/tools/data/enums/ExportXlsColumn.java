@@ -1,6 +1,7 @@
 package kr.pe.tocgic.tools.data.enums;
 
 public enum ExportXlsColumn {
+    HIDDEN_KEYS("keys", 0, null),
     KEY("key", 50, null),
     PLATFORM("platform", 10, null),
     LANGUAGE_KO("ko", 50, Language.KO),
@@ -27,5 +28,11 @@ public enum ExportXlsColumn {
 
     public Language getLanguage() {
         return language;
+    }
+
+    public enum ParseType {
+        HIDDEN_KEY,
+        KEY,
+        VALUE
     }
 }
