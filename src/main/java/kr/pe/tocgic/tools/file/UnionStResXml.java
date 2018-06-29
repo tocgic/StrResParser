@@ -12,6 +12,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -93,7 +95,10 @@ public class UnionStResXml implements IResourceTransform {
             // Document 저장
             DOMSource xmlDOM = new DOMSource(document);
             StreamResult xmlFile = new StreamResult(target);
-            TransformerFactory.newInstance().newTransformer().transform(xmlDOM, xmlFile);
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.transform(xmlDOM, xmlFile);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

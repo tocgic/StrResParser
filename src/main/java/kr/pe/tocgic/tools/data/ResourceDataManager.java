@@ -20,7 +20,7 @@ public class ResourceDataManager {
         platformMapMap.clear();
     }
 
-    private Map<String, LanguageModel> getLanguageMap(Platform platform) {
+    public Map<String, LanguageModel> getLanguageMap(Platform platform) {
         Map<String, LanguageModel> map = platformMapMap.get(platform);
         if (map == null) {
             map = new HashMap<>();

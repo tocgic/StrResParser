@@ -45,12 +45,12 @@ public class StResManager {
     }
 
     /**
-     * Language 별, 가져올 resource Directory 설정
+     * Language 별, resource Directory 설정
      * @param language
      * @param directory
      * @return
      */
-    public boolean setImportResourceDirectory(Language language, String directory) {
+    public boolean setResourceDirectory(Language language, String directory) {
         if (StringUtil.isNotEmpty(directory)) {
             File dir = new File(directory);
             if (dir.exists() && dir.isDirectory()) {
@@ -62,15 +62,34 @@ public class StResManager {
     }
 
     /**
-     * 설정된 resource Directory 를 통해, 리소스를 가져온다.
+     * 설정된 resource directory 에서 리소스 파일 을 loading 하여, ResourceDataManager 에 등록 한다.
      * @return
      */
-    public boolean importPlatformResources() {
-        resourceDataManager.clear();
+    public boolean doLoadResources() {
+        return loadResources(true);
+    }
+
+    /**
+     * 설정된 resource directory 에서 리소스 파일 을 ResourceDataManager 의 data 로 갱신 저장 한다.
+     * @return
+     */
+    public boolean doWriteResources() {
+        return loadResources(false);
+    }
+
+    /**
+     * 설정된 resource Directory 를 통해, 리소스를 (read/write) 온다.
+     * @param isRead
+     * @return
+     */
+    private boolean loadResources(boolean isRead) {
+        if (isRead) {
+            resourceDataManager.clear();
+        }
 
         for (SourceDirInfo sourceDirInfo : sourceDirInfoList) {
             if (sourceDirInfo.language != null && sourceDirInfo.dir != null) {
-                loadResourceFile(resourceDataManager, sourceDirInfo.language, sourceDirInfo.dir);
+                loadResourceFile(resourceDataManager, sourceDirInfo.language, sourceDirInfo.dir, isRead);
             }
         }
         return true;
@@ -155,14 +174,15 @@ public class StResManager {
      * @param resourceDataManager
      * @param language
      * @param file
+     * @param isRead {true : 읽기, false : 쓰기}
      */
-    private void loadResourceFile(ResourceDataManager resourceDataManager, Language language, File file) {
+    private void loadResourceFile(ResourceDataManager resourceDataManager, Language language, File file, boolean isRead) {
         if (file != null) {
             if (file.isDirectory()) {
                 File[] files = file.listFiles();
                 if (files != null) {
                     for (File childFile : files) {
-                        loadResourceFile(resourceDataManager, language, childFile);
+                        loadResourceFile(resourceDataManager, language, childFile, isRead);
                     }
                 }
             } else {
@@ -170,7 +190,13 @@ public class StResManager {
                     IResourceString parser = resourceFileParser[platform.ordinal()];
                     if (parser != null) {
                         if (parser.isSupportFileType(file)) {
-                            resourceDataManager.addItems(platform, language, parser.getKeyValueMap(file));
+                            if (isRead) {
+                                //read resource file
+                                resourceDataManager.addItems(platform, language, parser.getKeyValueMap(file));
+                            } else {
+                                //write resource file
+                                parser.applyValue(resourceDataManager.getLanguageMap(platform), language, file);
+                            }
                         }
                     }
                 }

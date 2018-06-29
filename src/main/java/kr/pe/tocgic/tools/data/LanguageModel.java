@@ -72,4 +72,12 @@ public class LanguageModel {
         }
         return false;
     }
+
+    public boolean hasDifferentValue(Language language, String source) {
+        String stored = getValue(language, null);
+        if (stored != null && !stored.equals(source)) {
+            return true;
+        }
+        return false;
+    }
 }
