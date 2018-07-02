@@ -3,9 +3,9 @@ package kr.pe.tocgic.tools.file.platform;
 import kr.pe.tocgic.tools.data.LanguageModel;
 import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.functions.IResourceString;
+import kr.pe.tocgic.tools.util.FileUtil;
 import kr.pe.tocgic.tools.util.Logger;
 import kr.pe.tocgic.tools.util.StringUtil;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.util.HashMap;
@@ -16,7 +16,10 @@ import java.util.Map;
  *
  */
 public class IOSStrings extends BaseStringResFile implements IResourceString {
-    private static final String NEW_LINE = "\r\n";
+
+    public IOSStrings() {
+        NODE_TOKEN = '"';
+    }
 
     @Override
     public boolean isSupportFileType(File file) {
@@ -44,10 +47,7 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
             bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                if (StringUtil.isNull(line)) {
-                    continue;
-                }
-                if (line.startsWith("/*")) {
+                if (isSkipLine(line)) {
                     continue;
                 }
                 String key = null, value = null;
@@ -83,37 +83,6 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
         return map;
     }
 
-    private int getStringNode(String line, int startIndex, StringBuilder target) {
-        if (StringUtil.isNull(line)) {
-            return startIndex;
-        }
-        if (target == null) {
-            return startIndex;
-        }
-        char preChar = 0;
-        boolean isStart = false;
-        int index = startIndex;
-        int lineLength = line.length();
-        while (index < lineLength) {
-            char ch = line.charAt(index++);
-            if (ch == '"') {
-                if (!isStart) {
-                    isStart = true;
-                    continue;
-                } else {
-                    if (preChar != '\\') {
-                        break;
-                    }
-                }
-            }
-            if (isStart) {
-                target.append(ch);
-            }
-            preChar = ch;
-        }
-        return index;
-    }
-
     @Override
     public boolean applyValue(Map<String, LanguageModel> sourceMap, Language language, File target) {
         if (!isValidFile(target)) {
@@ -136,13 +105,7 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
             bufferedWriter = new BufferedWriter(fileWriter);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                if (StringUtil.isNull(line)) {
-                    bufferedWriter.write(line);
-                    bufferedWriter.newLine();
-                    bufferedWriter.flush();
-                    continue;
-                }
-                if (line.startsWith("/*")) {
+                if (isSkipLine(line)) {
                     bufferedWriter.write(line);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
@@ -199,26 +162,17 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
         }
 
         if (result) {
-            //원본 -> 원본.시간.bak
-            //사본 -> 원본
-            //
-            File targetBak = new File(target.getAbsolutePath() + "." + System.currentTimeMillis() + ".bak");
-            result = target.renameTo(targetBak);
-            if (result) {
-                result = temp.renameTo(target);
-                if (result) {
-                    boolean ret = targetBak.delete();
-                    Logger.d(TAG, ">>>> file done : targetBak.delete():" + ret);
-                } else {
-                    boolean ret = targetBak.renameTo(target);
-                    Logger.d(TAG, ">>>> file rollback : targetBak.renameTo(target):" + ret);
-                }
-            } else {
-                boolean ret = temp.delete();
-                Logger.d(TAG, ">>>> origin file rollback : temp.delete():" + ret);
-            }
+            result = FileUtil.renameFile(temp, target, true);
         }
         Logger.i(TAG, ">> applyValue() result : " + result);
         return result;
+    }
+
+    @Override
+    protected boolean isSkipLine(String line) {
+        if (!super.isSkipLine(line)) {
+            return line.startsWith("/*");
+        }
+        return false;
     }
 }

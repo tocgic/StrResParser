@@ -1,6 +1,7 @@
 package kr.pe.tocgic.tools.file.platform;
 
 import kr.pe.tocgic.tools.util.Logger;
+import kr.pe.tocgic.tools.util.StringUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +9,7 @@ import java.io.FileReader;
 
 public class BaseStringResFile {
     protected String TAG = getClass().getSimpleName();
+    protected char NODE_TOKEN = '"';
 
     protected boolean isValidFile(File source) {
         if (source == null) {
@@ -47,5 +49,40 @@ public class BaseStringResFile {
             }
         }
         return jsonString;
+    }
+
+    protected int getStringNode(String line, int startIndex, StringBuilder target) {
+        if (StringUtil.isNull(line)) {
+            return startIndex;
+        }
+        if (target == null) {
+            return startIndex;
+        }
+        char preChar = 0;
+        boolean isStart = false;
+        int index = startIndex;
+        int lineLength = line.length();
+        while (index < lineLength) {
+            char ch = line.charAt(index++);
+            if (ch == NODE_TOKEN) {
+                if (!isStart) {
+                    isStart = true;
+                    continue;
+                } else {
+                    if (preChar != '\\') {
+                        break;
+                    }
+                }
+            }
+            if (isStart) {
+                target.append(ch);
+            }
+            preChar = ch;
+        }
+        return index;
+    }
+
+    protected boolean isSkipLine(String line) {
+        return StringUtil.isNull(line);
     }
 }

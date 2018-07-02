@@ -3,6 +3,7 @@ package kr.pe.tocgic.tools.file.platform;
 import kr.pe.tocgic.tools.data.LanguageModel;
 import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.functions.IResourceString;
+import kr.pe.tocgic.tools.util.FileUtil;
 import kr.pe.tocgic.tools.util.Logger;
 import kr.pe.tocgic.tools.util.StringUtil;
 import kr.pe.tocgic.tools.util.UniCodeUtil;
@@ -101,13 +102,7 @@ public class ServerProperties extends BaseStringResFile implements IResourceStri
             bufferedWriter = new BufferedWriter(fileWriter);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                if (StringUtil.isNull(line)) {
-                    bufferedWriter.write(line);
-                    bufferedWriter.newLine();
-                    bufferedWriter.flush();
-                    continue;
-                }
-                if (line.startsWith("#")) {
+                if (isSkipLine(line)) {
                     bufferedWriter.write(line);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
@@ -128,8 +123,11 @@ public class ServerProperties extends BaseStringResFile implements IResourceStri
 
                             StringBuilder newLine = new StringBuilder();
                             newLine.append(line.substring(0, index));
-                            newLine.append("= ");
-                            newLine.append(UniCodeUtil.encode(newValue));
+                            newLine.append(" ");
+                            if (!Language.EN.equals(language)) {
+                                newValue = UniCodeUtil.encode(newValue);
+                            }
+                            newLine.append(newValue);
 
                             line = newLine.toString();
                         }
@@ -160,26 +158,17 @@ public class ServerProperties extends BaseStringResFile implements IResourceStri
         }
 
         if (result) {
-            //원본 -> 원본.시간.bak
-            //사본 -> 원본
-            //
-            File targetBak = new File(target.getAbsolutePath() + "." + System.currentTimeMillis() + ".bak");
-            result = target.renameTo(targetBak);
-            if (result) {
-                result = temp.renameTo(target);
-                if (result) {
-                    boolean ret = targetBak.delete();
-                    Logger.d(TAG, ">>>> file done : targetBak.delete():" + ret);
-                } else {
-                    boolean ret = targetBak.renameTo(target);
-                    Logger.d(TAG, ">>>> file rollback : targetBak.renameTo(target):" + ret);
-                }
-            } else {
-                boolean ret = temp.delete();
-                Logger.d(TAG, ">>>> origin file rollback : temp.delete():" + ret);
-            }
+            result = FileUtil.renameFile(temp, target, true);
         }
         Logger.i(TAG, ">> applyValue() result : " + result);
         return result;
+    }
+
+    @Override
+    protected boolean isSkipLine(String line) {
+        if (!super.isSkipLine(line)) {
+            return line.startsWith("#");
+        }
+        return false;
     }
 }
