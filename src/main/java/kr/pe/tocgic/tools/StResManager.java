@@ -8,6 +8,7 @@ import kr.pe.tocgic.tools.file.UnionStResExcel;
 import kr.pe.tocgic.tools.file.UnionStResXml;
 import kr.pe.tocgic.tools.file.platform.AndroidXml;
 import kr.pe.tocgic.tools.file.platform.IOSStrings;
+import kr.pe.tocgic.tools.file.platform.WebJs;
 import kr.pe.tocgic.tools.file.platform.ServerProperties;
 import kr.pe.tocgic.tools.functions.IResourceString;
 import kr.pe.tocgic.tools.util.Logger;
@@ -42,6 +43,7 @@ public class StResManager {
         resourceFileParser[Platform.ANDROID.ordinal()] = new AndroidXml();
         resourceFileParser[Platform.IOS.ordinal()] = new IOSStrings();
         resourceFileParser[Platform.SERVER.ordinal()] = new ServerProperties();
+        resourceFileParser[Platform.WEB.ordinal()] = new WebJs();
 
         resourceDataManager = new ResourceDataManager();
     }
