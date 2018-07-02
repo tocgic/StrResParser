@@ -8,6 +8,7 @@ import kr.pe.tocgic.tools.file.UnionStResExcel;
 import kr.pe.tocgic.tools.file.UnionStResXml;
 import kr.pe.tocgic.tools.file.platform.AndroidXml;
 import kr.pe.tocgic.tools.file.platform.IOSStrings;
+import kr.pe.tocgic.tools.file.platform.ServerProperties;
 import kr.pe.tocgic.tools.functions.IResourceString;
 import kr.pe.tocgic.tools.util.Logger;
 import kr.pe.tocgic.tools.util.StringUtil;
@@ -40,6 +41,7 @@ public class StResManager {
         resourceFileParser = new IResourceString[Platform.values().length];
         resourceFileParser[Platform.ANDROID.ordinal()] = new AndroidXml();
         resourceFileParser[Platform.IOS.ordinal()] = new IOSStrings();
+        resourceFileParser[Platform.SERVER.ordinal()] = new ServerProperties();
 
         resourceDataManager = new ResourceDataManager();
     }
@@ -50,10 +52,10 @@ public class StResManager {
      * @param directory
      * @return
      */
-    public boolean setResourceDirectory(Language language, String directory) {
+    public boolean addResourcePath(Language language, String directory) {
         if (StringUtil.isNotEmpty(directory)) {
             File dir = new File(directory);
-            if (dir.exists() && dir.isDirectory()) {
+            if (dir.exists()) {
                 sourceDirInfoList.add(new SourceDirInfo(language, dir));
                 return true;
             }

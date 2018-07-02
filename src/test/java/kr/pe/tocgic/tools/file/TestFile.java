@@ -7,6 +7,7 @@ import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.data.enums.Platform;
 import kr.pe.tocgic.tools.file.platform.AndroidXml;
 import kr.pe.tocgic.tools.file.platform.IOSStrings;
+import kr.pe.tocgic.tools.file.platform.ServerProperties;
 import kr.pe.tocgic.tools.util.Logger;
 import org.junit.Test;
 
@@ -23,6 +24,13 @@ public class TestFile {
 
     Map<String, String> iOSStrings(String fileFullPath) {
         IOSStrings strings = new IOSStrings();
+        File source = new File(fileFullPath);
+        Logger.i("TEST", "isSupport : " + strings.isSupportFileType(source));
+        return strings.getKeyValueMap(source);
+    }
+
+    Map<String, String> serverProperties(String fileFullPath) {
+        ServerProperties strings = new ServerProperties();
         File source = new File(fileFullPath);
         Logger.i("TEST", "isSupport : " + strings.isSupportFileType(source));
         return strings.getKeyValueMap(source);
@@ -46,7 +54,7 @@ public class TestFile {
 //        resourceModelList.addItems(Platform.ANDROID, Language.KO, map);
         map = iOSStrings("/Users/tocgic/Documents/_Temp/agent-string-resources/iOS/Localizable.strings");
         printMap(map);
-        resourceDataManager.addItems(Platform.IOS, Language.KO, map);
+        resourceDataManager.addItems(Platform.SERVER, Language.EN, map);
 //
 //        resourceDataManager.sortByValue(Language.KO, true);
 //
@@ -58,8 +66,8 @@ public class TestFile {
         StResManager manager = new StResManager();
 
         //import, platform string resources
-        manager.setResourceDirectory(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.setResourceDirectory(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
         manager.doLoadResources();
 
         //export, union string resource
@@ -76,8 +84,8 @@ public class TestFile {
         StResManager manager = new StResManager();
 
         //import, platform string resources
-        manager.setResourceDirectory(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.setResourceDirectory(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
         manager.doLoadResources();
 
         //update, string resource from xlsx file
@@ -97,12 +105,12 @@ public class TestFile {
         StResManager manager = new StResManager();
 
         //import, platform string resources
-        manager.setResourceDirectory(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
-        manager.setResourceDirectory(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.setResourceDirectory(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
-        manager.setResourceDirectory(Language.KO, "/Users/tocgic/Temp/test/ios/ko.lproj/");
-        manager.setResourceDirectory(Language.EN, "/Users/tocgic/Temp/test/ios/en.lproj/");
-        manager.setResourceDirectory(Language.JA, "/Users/tocgic/Temp/test/ios/ja.lproj/");
+        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
+        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/ios/ko.lproj/");
+        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/ios/en.lproj/");
+        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/ios/ja.lproj/");
         manager.doLoadResources();
 
         //export, union string resource
@@ -116,12 +124,12 @@ public class TestFile {
         StResManager manager = new StResManager();
 
         //import, platform string resources
-        manager.setResourceDirectory(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
-        manager.setResourceDirectory(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.setResourceDirectory(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
-        manager.setResourceDirectory(Language.KO, "/Users/tocgic/Temp/test/ios/ko.lproj/");
-        manager.setResourceDirectory(Language.EN, "/Users/tocgic/Temp/test/ios/en.lproj/");
-        manager.setResourceDirectory(Language.JA, "/Users/tocgic/Temp/test/ios/ja.lproj/");
+        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
+        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/ios/ko.lproj/");
+        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/ios/en.lproj/");
+        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/ios/ja.lproj/");
         manager.doLoadResources();
 
         //update, string resource from xlsx file
