@@ -83,6 +83,6 @@ public class BaseStringResFile {
     }
 
     protected boolean isSkipLine(String line) {
-        return StringUtil.isNull(line);
+        return StringUtil.isEmpty(line);
     }
 }

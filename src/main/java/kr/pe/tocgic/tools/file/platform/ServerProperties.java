@@ -62,7 +62,7 @@ public class ServerProperties extends BaseStringResFile implements IResourceStri
                 if (StringUtil.isNotEmpty(key) && value != null) {
                     map.put(key, value);
                 } else {
-                    Logger.w(TAG, "fail parse : " + line);
+                    Logger.w(TAG, "fail parse : [" + line + "]");
                 }
             }
         } catch (Exception e) {
@@ -166,9 +166,9 @@ public class ServerProperties extends BaseStringResFile implements IResourceStri
 
     @Override
     protected boolean isSkipLine(String line) {
-        if (!super.isSkipLine(line)) {
-            return line.startsWith("#");
+        if (super.isSkipLine(line)) {
+            return true;
         }
-        return false;
+        return line.startsWith("#");
     }
 }

@@ -65,7 +65,7 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
                 if (StringUtil.isNotEmpty(key)) {
                     map.put(key, value);
                 } else {
-                    Logger.w(TAG, "fail parse : " + line);
+                    Logger.w(TAG, "fail parse : [" + line + "]");
                 }
             }
         } catch (Exception e) {
@@ -170,9 +170,9 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
 
     @Override
     protected boolean isSkipLine(String line) {
-        if (!super.isSkipLine(line)) {
-            return line.startsWith("/*");
+        if (super.isSkipLine(line)) {
+            return true;
         }
-        return false;
+        return line.startsWith("/*");
     }
 }

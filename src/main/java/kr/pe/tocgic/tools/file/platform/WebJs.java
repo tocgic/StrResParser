@@ -70,7 +70,7 @@ public class WebJs extends BaseStringResFile implements IResourceString {
                 if (StringUtil.isNotEmpty(key) && value != null) {
                     map.put(key, value);
                 } else {
-                    Logger.w(TAG, "fail parse : " + line);
+                    Logger.w(TAG, "fail parse : [" + line + "]");
                 }
             }
         } catch (Exception e) {
@@ -175,14 +175,24 @@ public class WebJs extends BaseStringResFile implements IResourceString {
 
     @Override
     protected boolean isSkipLine(String line) {
-        if (!super.isSkipLine(line)) {
-            String temp = line.trim();
-            if (temp.startsWith("//")) {
-                return true;
-            }
-            if (temp.startsWith("/*")) {
-                return true;
-            }
+        if (super.isSkipLine(line)) {
+            return true;
+        }
+        String temp = line.trim();
+        if (temp.startsWith("//")) {
+            return true;
+        }
+        if (temp.startsWith("/*")) {
+            return true;
+        }
+        if (temp.startsWith("var ")) {
+            return true;
+        }
+        if (temp.startsWith("locale:")) {
+            return true;
+        }
+        if (temp.indexOf('=') < 0) {
+            return true;
         }
         return false;
     }
