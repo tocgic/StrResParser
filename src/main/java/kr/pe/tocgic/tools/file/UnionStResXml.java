@@ -57,6 +57,7 @@ public class UnionStResXml implements IResourceTransform {
         }
         try {
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            document.setXmlStandalone(true);
 
             //create node <items>
             Node items = document.createElement(TAG_ITEMS);
@@ -96,6 +97,7 @@ public class UnionStResXml implements IResourceTransform {
             DOMSource xmlDOM = new DOMSource(document);
             StreamResult xmlFile = new StreamResult(target);
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.transform(xmlDOM, xmlFile);
