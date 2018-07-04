@@ -44,10 +44,7 @@ public class ServerProperties extends BaseStringResFile implements IResourceStri
             bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                if (StringUtil.isNull(line)) {
-                    continue;
-                }
-                if (line.startsWith("#")) {
+                if (isSkipLine(line)) {
                     continue;
                 }
                 String key = null, value = null;
