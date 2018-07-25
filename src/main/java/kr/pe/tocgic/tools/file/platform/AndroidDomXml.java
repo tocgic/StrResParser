@@ -24,8 +24,12 @@ import java.util.Map;
 /**
  * Android 문구 리소스 (*.xml)
  *
+ * DOM 파서를 이용하여, Android Resource xml 파일을 파싱한다.
+ * DOM 파서를 이용하기 때문에, 기존 xml 의 문구 (value) 를 갱신하는 경우,
+ * 원본 xml 과 줄간격, Tag 정렬 등 여러가지 변경 사항이 발생 할 수 있다.
+ *
  */
-public class AndroidXml extends BaseStringResFile implements IResourceString {
+public class AndroidDomXml extends BaseStringResFile implements IResourceString {
     private static final String TAG_RESOURCES = "resources";
     private static final String TAG_STRING = "string";
 
@@ -90,11 +94,13 @@ public class AndroidXml extends BaseStringResFile implements IResourceString {
         }
         boolean result = false;
         Logger.i(TAG, ">> parsing target file : " + target.getAbsolutePath());
+        boolean isChanged = false;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(target);
             doc.getDocumentElement().normalize();
+            doc.setXmlStandalone(true);
 
             NodeList resourcesNodeList = doc.getElementsByTagName(TAG_RESOURCES);
             int nodeSize = resourcesNodeList.getLength();
@@ -118,17 +124,21 @@ public class AndroidXml extends BaseStringResFile implements IResourceString {
                         String newValue = languageModel.getValue(language, null);
                         Logger.v(TAG, "update [" + key + "] " + value + " >>>> " + newValue);
                         stringNode.setTextContent(newValue);
+                        isChanged = true;
                     }
                 }
             }
 
-            // Document 저장
-            DOMSource xmlDOM = new DOMSource(doc);
-            StreamResult xmlFile = new StreamResult(target);
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.transform(xmlDOM, xmlFile);
+            if (isChanged) {
+                // Document 저장
+                DOMSource xmlDOM = new DOMSource(doc);
+                StreamResult xmlFile = new StreamResult(target);
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+                transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.transform(xmlDOM, xmlFile);
+            }
 
             result = true;
         } catch (Exception e) {
