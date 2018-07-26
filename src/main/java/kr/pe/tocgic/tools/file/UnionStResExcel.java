@@ -208,8 +208,36 @@ public class UnionStResExcel implements IResourceTransform {
                     }
                     break;
             }
+//            동작 안됨 (셀에 '' 노출됨) - 우선 보류
+//            if (isStartedSpecialChar(value)) {
+//                value = "'" + value;
+//            }
             cell.setCellValue(value);
         }
+    }
+
+    /**
+     * Excel에서 작은 따옴표가 사라지는 문제
+     * (https://answers.microsoft.com/ko-kr/msoffice/forum/msoffice_excel-mso_other-mso_2007/%EC%97%91%EC%85%80%EC%9E%91%EC%9D%80/94dd56fb-02af-4957-a668-ca1eedbf506d?messageId=f5fc533c-3d3a-482e-9759-dee8e216dccb)
+     *
+     * 문의 하신 Excel에서 작은 따옴표가 사라지는 문제에 대한 답변을 드리겠습니다.
+     * 말씀해 주신 작은 따옴표는 !@#$%^&*()~"',.? 등의 기호를 텍스트로 인식시키기 위해서 사용하는 구분자입니다.
+     * 따라서 작은 따옴표가 나타나도록 설정하고자 하신다면, 작은 따옴표를 2개 연속으로 입력하시기 바랍니다.
+     * 예를 들어서 ''내용  이런 방식으로 입력해 주시기 바랍니다.
+     *
+     * @param value
+     * @return
+     */
+    private boolean isStartedSpecialChar(String value) {
+        if (StringUtil.isNotEmpty(value)) {
+            String[] specials = {"'"};
+            for (String special : specials) {
+                if (value.startsWith(special)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static final String TOKEN_ITEM = "^:^";
