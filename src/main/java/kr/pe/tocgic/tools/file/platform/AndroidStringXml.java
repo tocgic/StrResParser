@@ -20,6 +20,9 @@ import java.util.Map;
  */
 public class AndroidStringXml extends BaseStringResFile implements IResourceString {
     private static final String TAG_CLOSE = "/>";
+    private static final String TAG_DOCTYPE_OPEN = "<!DOCTYPE";
+    private static final String TAG_ENTITY_OPEN = "<!ENTITY";
+    private static final String TAG_ENTITY_CLOSE = ">";
     private static final String TAG_COMMENT_OPEN = "<--";
     private static final String TAG_COMMENT_CLOSE = "-->";
     private static final String TAG_STRING_OPEN = "<string ";
@@ -38,6 +41,16 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
         public String toString() {
             return "StringNode {" + key + ", " + value + "}";
         }
+    }
+
+    public AndroidStringXml() {
+        String[] special_anp = {"&", "&amp;", "&#38;"};
+//      String[] special_lt = {"<", "&lt;", "&#60;"};
+//      String[] special_gt = {">", "&gt;", "&#62;"};
+        String[] special_apos = {"'", "\\\\'"};
+//      String[] special_quot = {"\"", "\\\\\""};
+//      specials = new String[][]{special_anp, special_lt, special_gt, special_apos, special_quot};
+        specials = new String[][]{special_anp, /*special_lt, special_gt, */special_apos/*, special_quot*/};
     }
 
     @Override
@@ -61,6 +74,8 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
         if (!isValidFile(source)) {
             return map;
         }
+        entityMap.clear();
+        entityMapRev.clear();
         Logger.i(TAG, ">> parsing source file : " + source.getAbsolutePath());
         BufferedReader bufferedReader = null;
         try {
@@ -82,13 +97,18 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
                             if (tagItem.endsWith(TAG_COMMENT_CLOSE)) {
                                 tagging = false;
                             }
+                        } else if (tagItem.startsWith(TAG_DOCTYPE_OPEN)) {
+                            if (tagItem.endsWith(TAG_CLOSE)) {
+                                tagging = false;
+                                parseDoctypeTag(tagItem);
+                            }
                         } else if (tagItem.startsWith(TAG_STRING_OPEN)) {
                             if (tagItem.endsWith(TAG_STRING_CLOSE) || tagItem.endsWith(TAG_CLOSE)) {
                                 tagging = false;
                                 StringNode node = getStringNode(tagItem);
                                 //Logger.v(TAG, "StringNode : " + node);
                                 if (node != null) {
-                                    map.put(node.key, node.value);
+                                    map.put(node.key, clearSpecialTag(node.value));
                                 }
                             }
                         } else {
@@ -172,6 +192,8 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
         if (!isValidFile(target)) {
             return false;
         }
+        entityMap.clear();
+        entityMapRev.clear();
         boolean result = false;
         Logger.i(TAG, ">> parsing target file : " + target.getAbsolutePath());
 
@@ -204,6 +226,11 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
                             if (tagItem.endsWith(TAG_COMMENT_CLOSE)) {
                                 tagging = false;
                             }
+                        } else if (tagItem.startsWith(TAG_DOCTYPE_OPEN)) {
+                            if (tagItem.endsWith(TAG_CLOSE)) {
+                                tagging = false;
+                                parseDoctypeTag(tagItem);
+                            }
                         } else if (tagItem.startsWith(TAG_STRING_OPEN)) {
                             if (tagItem.endsWith(TAG_STRING_CLOSE) || tagItem.endsWith(TAG_CLOSE)) {
                                 tagging = false;
@@ -211,8 +238,8 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
                                 //Logger.v(TAG, "StringNode : " + node);
                                 if (node != null) {
                                     LanguageModel languageModel = sourceMap.get(node.key);
-                                    if (languageModel != null && languageModel.hasDifferentValue(language, node.value)) {
-                                        String newValue = languageModel.getValue(language, null);
+                                    if (languageModel != null && languageModel.hasDifferentValue(language, clearSpecialTag(node.value))) {
+                                        String newValue = insertSpecialTag(languageModel.getValue(language, null));
                                         Logger.v(TAG, "update [" + node.key + "] " + node.value + " >>>> " + newValue);
 
                                         int stringTagEndIndex = tagItem.indexOf(">");
@@ -269,5 +296,63 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
         }
         Logger.i(TAG, ">> applyValue() result : " + result);
         return result;
+    }
+
+    private void parseDoctypeTag(String source) {
+        BufferedReader bufferedReader = null;
+        try {
+            source = source.replaceFirst(TAG_DOCTYPE_OPEN, "");
+            bufferedReader = new BufferedReader(new StringReader(source));
+            int value;
+            StringBuilder buffer = new StringBuilder();
+            boolean tagging = false;
+            while ((value = bufferedReader.read()) > -1) {
+                char ch = (char) value;
+                buffer.append(ch);
+                if (ch == '<') {
+                    tagging = true;
+                }
+                if (tagging) {
+                    if (ch == '>') {
+                        String tagItem = buffer.toString();
+                        if (tagItem.startsWith(TAG_ENTITY_OPEN)) {
+                            if (tagItem.endsWith(TAG_ENTITY_CLOSE)) {
+                                tagging = false;
+                                addEntityItem(tagItem);
+                            }
+                        } else {
+                            tagging = false;
+                        }
+                    }
+                }
+                if (!tagging) {
+                    //clear buffer
+                    buffer.setLength(0);
+                }
+            }
+        } catch (Exception e) {
+            Logger.w(TAG, e.getMessage());
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void addEntityItem(String tagItem) {
+        //<!ENTITY key "value">
+        String body = tagItem.replaceFirst(TAG_ENTITY_OPEN, "").trim();
+        String[] items = body.split(" ");
+        if (items.length == 2) {
+            String key = items[0];
+            StringBuilder stringBuilder = new StringBuilder();
+            getStringNode(items[1], 0, stringBuilder);
+            entityMap.put(key, stringBuilder.toString());
+            entityMapRev.put(stringBuilder.toString(), key);
+        }
     }
 }

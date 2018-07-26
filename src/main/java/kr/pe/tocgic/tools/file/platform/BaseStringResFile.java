@@ -6,10 +6,15 @@ import kr.pe.tocgic.tools.util.StringUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.HashMap;
 
 public class BaseStringResFile {
     protected String TAG = getClass().getSimpleName();
     protected char NODE_TOKEN = '"';
+
+    protected String[][] specials;
+    protected HashMap<String, String> entityMap = new HashMap<>();
+    protected HashMap<String, String> entityMapRev = new HashMap<>();
 
     protected boolean isValidFile(File source) {
         if (source == null) {
@@ -84,5 +89,44 @@ public class BaseStringResFile {
 
     protected boolean isSkipLine(String line) {
         return StringUtil.isEmpty(line);
+    }
+
+    protected String clearSpecialTag(String original) {
+        if (StringUtil.isEmpty(original)) {
+            return original;
+        }
+        if (original.contains("Agree to Terms")) {
+            Logger.v(TAG, "original:"+original);
+        }
+        for (String key : entityMap.keySet()) {
+            original = original.replaceAll("&"+key+";", entityMap.get(key));
+        }
+        if (specials != null) {
+            for (String[] special : specials) {
+                for (int i = 1; i < special.length; i++) {
+                    original = original.replaceAll(special[i], special[0]);
+                }
+            }
+        }
+        return original;
+    }
+
+    protected String insertSpecialTag(String original) {
+        if (StringUtil.isEmpty(original)) {
+            return original;
+        }
+        if (original.contains("Agree to Terms")) {
+            Logger.v(TAG, "original:"+original);
+        }
+        if (specials != null) {
+            for (String[] special : specials) {
+                String toStr = special[1];
+                original = original.replaceAll(special[0], toStr);
+            }
+        }
+        for (String key : entityMapRev.keySet()) {
+            original = original.replaceAll(key, "&"+entityMapRev.get(key)+";");
+        }
+        return original;
     }
 }
