@@ -98,7 +98,7 @@ public class ResourceDataManager {
         List<LanguageModel> list = getLanguageModesByValue(defaultLanguage, defaultLangValue);
         if (list != null && list.size() > 0) {
             for (LanguageModel model : list) {
-                model.setValue(language, langValue);
+                model.setValue(language, langValue, true);
             }
             return true;
         }
