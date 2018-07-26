@@ -19,6 +19,9 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
 
     public IOSStrings() {
         NODE_TOKEN = '"';
+
+        String[] special_quot = {"\"", "\\\\\""};
+        specials = new String[][]{special_quot};
     }
 
     @Override
@@ -63,7 +66,7 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
                     }
                 }
                 if (StringUtil.isNotEmpty(key)) {
-                    map.put(key, value);
+                    map.put(key, clearSpecialTag(value));
                 } else {
                     Logger.w(TAG, "fail parse : [" + line + "]");
                 }
@@ -123,8 +126,8 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
                         value = item.toString();
 
                         LanguageModel languageModel = sourceMap.get(key);
-                        if (languageModel != null && languageModel.hasDifferentValue(language, value)) {
-                            String newValue = languageModel.getValue(language, null);
+                        if (languageModel != null && languageModel.hasDifferentValue(language, clearSpecialTag(value))) {
+                            String newValue = insertSpecialTag(languageModel.getValue(language, null));
                             Logger.v(TAG, "update [" + key + "] " + value + " >>>> " + newValue);
 
                             StringBuilder newLine = new StringBuilder();
