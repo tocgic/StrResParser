@@ -66,7 +66,7 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
                     }
                 }
                 if (StringUtil.isNotEmpty(key)) {
-                    map.put(key, clearSpecialTag(value));
+                    map.put(key, replaceCommonExpression(true, value));
                 } else {
                     Logger.w(TAG, "fail parse : [" + line + "]");
                 }
@@ -126,8 +126,8 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
                         value = item.toString();
 
                         LanguageModel languageModel = sourceMap.get(key);
-                        if (languageModel != null && languageModel.hasDifferentValue(language, clearSpecialTag(value))) {
-                            String newValue = insertSpecialTag(languageModel.getValue(language, null));
+                        if (languageModel != null && languageModel.hasDifferentValue(language, replaceCommonExpression(true, value))) {
+                            String newValue = replaceCommonExpression(false, languageModel.getValue(language, null));
                             Logger.v(TAG, "update [" + key + "] " + value + " >>>> " + newValue);
 
                             StringBuilder newLine = new StringBuilder();
@@ -177,5 +177,22 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
             return true;
         }
         return line.startsWith("/*");
+    }
+
+    @Override
+    protected String replaceCommonParameter(boolean isEncode, String original) {
+        // %1$@ -> %1$s
+        // %1$@ : %[0-9]*\$@
+        // %1$s : %[0-9]*\$s
+        if (original != null) {
+            final String regExpIOS = "(%[0-9]*\\$)@";
+            final String regExpAndroid = "(%[0-9]*\\$)s";
+            if (isEncode) {
+                original = original.replaceAll(regExpIOS, "$1s");
+            } else {
+                original = original.replaceAll(regExpAndroid, "$1@");
+            }
+        }
+        return original;
     }
 }

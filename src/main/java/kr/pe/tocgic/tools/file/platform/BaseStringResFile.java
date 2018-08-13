@@ -91,12 +91,24 @@ public class BaseStringResFile {
         return StringUtil.isEmpty(line);
     }
 
+    protected String replaceCommonExpression(boolean isEncode, String original) {
+        String encoded = original;
+        if (isEncode) {
+            encoded = clearSpecialTag(encoded);
+        } else {
+            encoded = insertSpecialTag(encoded);
+        }
+        encoded = replaceCommonParameter(isEncode, encoded);
+        return encoded;
+    }
+
+    protected String replaceCommonParameter(boolean isEncode, String original) {
+        return original;
+    }
+
     protected String clearSpecialTag(String original) {
         if (StringUtil.isEmpty(original)) {
             return original;
-        }
-        if (original.contains("Agree to Terms")) {
-            Logger.v(TAG, "original:"+original);
         }
         for (String key : entityMap.keySet()) {
             original = original.replaceAll("&"+key+";", entityMap.get(key));
@@ -114,9 +126,6 @@ public class BaseStringResFile {
     protected String insertSpecialTag(String original) {
         if (StringUtil.isEmpty(original)) {
             return original;
-        }
-        if (original.contains("Agree to Terms")) {
-            Logger.v(TAG, "original:"+original);
         }
         if (specials != null) {
             for (String[] special : specials) {

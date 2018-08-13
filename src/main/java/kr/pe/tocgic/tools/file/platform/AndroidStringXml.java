@@ -108,7 +108,7 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
                                 StringNode node = getStringNode(tagItem);
                                 //Logger.v(TAG, "StringNode : " + node);
                                 if (node != null) {
-                                    map.put(node.key, clearSpecialTag(node.value));
+                                    map.put(node.key, replaceCommonExpression(true, node.value));
                                 }
                             }
                         } else {
@@ -238,8 +238,8 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
                                 //Logger.v(TAG, "StringNode : " + node);
                                 if (node != null) {
                                     LanguageModel languageModel = sourceMap.get(node.key);
-                                    if (languageModel != null && languageModel.hasDifferentValue(language, clearSpecialTag(node.value))) {
-                                        String newValue = insertSpecialTag(languageModel.getValue(language, null));
+                                    if (languageModel != null && languageModel.hasDifferentValue(language, replaceCommonExpression(true, node.value))) {
+                                        String newValue = replaceCommonExpression(false, languageModel.getValue(language, null));
                                         Logger.v(TAG, "update [" + node.key + "] " + node.value + " >>>> " + newValue);
 
                                         int stringTagEndIndex = tagItem.indexOf(">");
