@@ -7,8 +7,6 @@ import kr.pe.tocgic.tools.strresparser.util.StringUtil;
 import kr.pe.tocgic.tools.strresparser.view.model.StringPath;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
