@@ -3,12 +3,15 @@
  */
 package kr.pe.tocgic.tools.strresparser;
 
+import kr.pe.tocgic.tools.strresparser.view.MainView;
+
 public class App {
     public String getGreeting() {
-        return "Hello world.";
+        return "StResManager start.";
     }
 
     public static void main(String[] args) {
         System.out.println(new App().getGreeting());
+        new MainView();
     }
 }

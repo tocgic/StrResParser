@@ -48,6 +48,10 @@ public class StResManager {
         resourceDataManager = new ResourceDataManager();
     }
 
+    public void clearSourceDirInfoList() {
+        sourceDirInfoList.clear();
+    }
+
     /**
      * Language 별, resource Directory 설정
      * @param language
@@ -105,17 +109,19 @@ public class StResManager {
      * @param overWrite 덮어쓰기 여부
      * @return
      */
-    public boolean makeUnionStResXml(File target, boolean overWrite) {
+    public boolean makeUnionStResXml(File target, boolean overWrite) throws Exception {
         if (target == null) {
-            Logger.e(TAG, "Can NOT make UnionStResXml file. target is Null.");
-            return false;
+            String msg = "Can NOT make UnionStResXml file. target is Null.";
+            Logger.e(TAG, msg);
+            throw new Exception(msg);
         }
         if (target.exists()) {
             if (overWrite) {
                 target.delete();
             } else {
-                Logger.e(TAG, "Can NOT make UnionStResXml file. target is Already exist.");
-                return false;
+                String msg = "Can NOT make UnionStResXml file. target is Already exist.";
+                Logger.e(TAG, msg);
+                throw new Exception(msg);
             }
         }
         UnionStResXml unionStResXml = new UnionStResXml();
@@ -132,17 +138,24 @@ public class StResManager {
      * @param isIgnoreEmptyString 모두(ko, en, ja..) 비어있는 리소스 의 경우 무시 여부
      * @return
      */
-    public boolean makeExcel(File target, boolean overWrite, ExportXlsColumn[] columns, boolean isIgnoreEmptyString) {
+    public boolean makeExcel(File target, boolean overWrite, ExportXlsColumn[] columns, boolean isIgnoreEmptyString) throws Exception {
         if (target == null) {
-            Logger.e(TAG, "Can NOT make UnionStResExcel file. target is Null.");
-            return false;
+            String msg = "Can NOT make UnionStResExcel file. target is Null.";
+            Logger.e(TAG, msg);
+            throw new Exception(msg);
         }
         if (target.exists()) {
             if (overWrite) {
-                target.delete();
+                boolean result = target.delete();
+                if (!result) {
+                    String msg = "Can NOT make UnionStResExcel file. Existing file deletion failed.";
+                    Logger.e(TAG, msg);
+                    throw new Exception(msg);
+                }
             } else {
-                Logger.e(TAG, "Can NOT make UnionStResExcel file. target is Already exist.");
-                return false;
+                String msg = "Can NOT make UnionStResExcel file. target is Already exist.";
+                Logger.e(TAG, msg);
+                throw new Exception(msg);
             }
         }
         if (columns == null) {
@@ -162,10 +175,11 @@ public class StResManager {
      * @param isIgnoreEmptyString 각 Language(ko, en, ja..) 별 비어있는 리소스 의 경우 무시 여부
      * @return
      */
-    public boolean importFromExcel(File source, boolean isIgnoreEmptyString) {
+    public boolean importFromExcel(File source, boolean isIgnoreEmptyString) throws Exception {
         if (source == null || !source.exists()) {
-            Logger.e(TAG, "importFromExcel() Fail. source is not exist.");
-            return false;
+            String msg = "importFromExcel() Fail. source is not exist.";
+            Logger.e(TAG, msg);
+            throw new Exception(msg);
         }
         UnionStResExcel unionStResExcel = new UnionStResExcel(null, isIgnoreEmptyString);
         boolean result = unionStResExcel.importFile(source, resourceDataManager);

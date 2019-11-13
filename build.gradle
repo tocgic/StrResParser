@@ -50,5 +50,5 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClassName = 'StrResParser.App'
+    mainClassName = 'kr.pe.tocgic.tools.strresparser.App'
 }
