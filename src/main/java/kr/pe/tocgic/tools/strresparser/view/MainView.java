@@ -91,7 +91,7 @@ public class MainView extends JFrame {
         btnSelectStrPath.addActionListener(e -> {
             try {
                 txtStrPath.setText(browseDirectory());
-            } catch (IOException e1) {
+            } catch (Exception e1) {
                 showMessageDialog(e1.getMessage());
             }
         });
@@ -163,7 +163,7 @@ public class MainView extends JFrame {
         btnSelectOutput.addActionListener(e -> {
             try {
                 txtSelectOutputPath.setText(browseDirectory());
-            } catch (IOException e1) {
+            } catch (Exception e1) {
                 showMessageDialog(e1.getMessage());
             }
         });
@@ -209,7 +209,7 @@ public class MainView extends JFrame {
     }
 
     /** browse File **/
-    private String browseFile() throws IOException {
+    private String browseFile() throws Exception {
         String result = "";
 
         JFileChooser c = new JFileChooser();
@@ -219,14 +219,14 @@ public class MainView extends JFrame {
         if (rVal == JFileChooser.APPROVE_OPTION) {
             result = c.getCurrentDirectory().toString() + File.separator + c.getSelectedFile().getName();
         }
-//        if (rVal == JFileChooser.CANCEL_OPTION) {
-//        	uploadApkText.setText("");
-//        }
+        if (rVal == JFileChooser.CANCEL_OPTION) {
+        	throw new Exception("사용자 취소");
+        }
         return result;
     }
 
     /** browse Directory **/
-    private String browseDirectory() throws IOException {
+    private String browseDirectory() throws Exception {
         String result = "";
 
         JFileChooser c = new JFileChooser();
@@ -237,9 +237,9 @@ public class MainView extends JFrame {
         if (rVal == JFileChooser.APPROVE_OPTION) {
             result = c.getCurrentDirectory().toString() + File.separator + c.getSelectedFile().getName();
         }
-//        if (rVal == JFileChooser.CANCEL_OPTION) {
-//        	uploadApkText.setText("");
-//        }
+        if (rVal == JFileChooser.CANCEL_OPTION) {
+            throw new Exception("사용자 취소");
+        }
         return result;
     }
 
@@ -365,6 +365,6 @@ public class MainView extends JFrame {
     }
 
     private void showMessageDialog(String message) {
-        JOptionPane.showMessageDialog(null, message);
+        JOptionPane.showMessageDialog(this, message);
     }
 }
