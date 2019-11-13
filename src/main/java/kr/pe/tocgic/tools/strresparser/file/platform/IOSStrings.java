@@ -176,7 +176,7 @@ public class IOSStrings extends BaseStringResFile implements IResourceString {
         if (super.isSkipLine(line)) {
             return true;
         }
-        return line.startsWith("/*");
+        return line.startsWith("/*") || line.startsWith("//");
     }
 
     @Override
