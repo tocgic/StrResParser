@@ -65,103 +65,123 @@ public class TestFile {
     public void sample_export() {
         StResManager manager = new StResManager();
 
-        //import, platform string resources
-        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
-        manager.doLoadResources();
+        try {
+            //import, platform string resources
+            manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+            manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+            manager.doLoadResources();
 
-        //export, union string resource
-        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/sample/unionStRes.xml"), true);
+            //export, union string resource
+            manager.makeUnionStResXml(new File("/Users/tocgic/Temp/sample/unionStRes.xml"), true);
 //        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null, true);
 //        ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
 //        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes_onlyString.xlsx"), true, columns, true);
-        ExportXlsColumn[] columns2 = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/sample/unionStRes_hiddenKeys.xlsx"), true, columns2, true);
+            ExportXlsColumn[] columns2 = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+            manager.makeExcel(new File("/Users/tocgic/Temp/sample/unionStRes_hiddenKeys.xlsx"), true, columns2, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void sample_import() {
         StResManager manager = new StResManager();
 
-        //import, platform string resources
-        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
-        manager.doLoadResources();
+        try {
+            //import, platform string resources
+            manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+            manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+            manager.doLoadResources();
 
-        //update, string resource from xlsx file
+            //update, string resource from xlsx file
 //        manager.importFromExcel(new File("/Users/tocgic/Temp/sample/unionStRes.xlsx"), true);
 //        manager.importFromExcel(new File("/Users/tocgic/Temp/sample/unionStRes_custom.xlsx"), true);
-        manager.importFromExcel(new File("/Users/tocgic/Temp/sample/unionStRes_custom_excel_bug.xlsx"), true);
+            manager.importFromExcel(new File("/Users/tocgic/Temp/sample/unionStRes_custom_excel_bug.xlsx"), true);
 
-        //Write, platform string resources
-        manager.doWriteResources();
+            //Write, platform string resources
+            manager.doWriteResources();
 
-        //export, updated union string resource
-        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/sample/unionStRes.xml"), true);
+            //export, updated union string resource
+            manager.makeUnionStResXml(new File("/Users/tocgic/Temp/sample/unionStRes.xml"), true);
 //        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null, true);
 //        ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
 //        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes_onlyString.xlsx"), true, columns, true);
-        ExportXlsColumn[] columns2 = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/sample/unionStRes_hiddenKeys.xlsx"), true, columns2, true);
+            ExportXlsColumn[] columns2 = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+            manager.makeExcel(new File("/Users/tocgic/Temp/sample/unionStRes_hiddenKeys.xlsx"), true, columns2, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testExportMySample() {
         StResManager manager = new StResManager();
 
-        //import, platform string resources
-        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
-        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+        try {
+            //import, platform string resources
+            manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
+            manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+            manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
 //        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/ios/ko.lproj/");
 //        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/ios/en.lproj/");
 //        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/ios/ja.lproj/");
-        manager.doLoadResources();
+            manager.doLoadResources();
 
-        //export, union string resource
-        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/test/unionStRes.xml"), true);
-        ExportXlsColumn[] columns = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStRes_hiddenKeys.xlsx"), true, columns, true);
+            //export, union string resource
+            manager.makeUnionStResXml(new File("/Users/tocgic/Temp/test/unionStRes.xml"), true);
+            ExportXlsColumn[] columns = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+            manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStRes_hiddenKeys.xlsx"), true, columns, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testImportMySample() {
         StResManager manager = new StResManager();
 
-        //import, platform string resources
-        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
-        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
-        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+        try {
+            //import, platform string resources
+            manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
+            manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+            manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
 //        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/test/ios/ko.lproj/");
 //        manager.addResourcePath(Language.EN, "/Users/tocgic/Temp/test/ios/en.lproj/");
 //        manager.addResourcePath(Language.JA, "/Users/tocgic/Temp/test/ios/ja.lproj/");
-        manager.doLoadResources();
+            manager.doLoadResources();
 
-        //update, string resource from xlsx file
-        manager.importFromExcel(new File("/Users/tocgic/Temp/test/unionStRes_hiddenKeys_edit.xls"), true);
+            //update, string resource from xlsx file
+            manager.importFromExcel(new File("/Users/tocgic/Temp/test/unionStRes_hiddenKeys_edit.xls"), true);
 
-        //Write, platform string resources
-        manager.doWriteResources();
+            //Write, platform string resources
+            manager.doWriteResources();
 
-        //export, union string resource
+            //export, union string resource
 //        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/test/unionStRes.xml"), true);
-        ExportXlsColumn[] columns = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStRes_hiddenKeys.xlsx"), true, columns, true);
+            ExportXlsColumn[] columns = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+            manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStRes_hiddenKeys.xlsx"), true, columns, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testExportServer() {
         StResManager manager = new StResManager();
 
-        //import, platform string resources
-        manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/server/messages_ko_KR.properties");
-        manager.doLoadResources();
+        try {
+            //import, platform string resources
+            manager.addResourcePath(Language.KO, "/Users/tocgic/Temp/server/messages_ko_KR.properties");
+            manager.doLoadResources();
 
-        //export, union string resource
-        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/server/unionStRes.xml"), true);
+            //export, union string resource
+            manager.makeUnionStResXml(new File("/Users/tocgic/Temp/server/unionStRes.xml"), true);
 //        ExportXlsColumn[] columns = {ExportXlsColumn.HIDDEN_KEYS, ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/server/unionStRes.xlsx"), true, columns, true);
+            ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+            manager.makeExcel(new File("/Users/tocgic/Temp/server/unionStRes.xlsx"), true, columns, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
