@@ -14,25 +14,16 @@ import java.awt.event.MouseListener;
 import java.io.File;
 
 public class MainView extends JFrame {
-    private JButton btnSelectStrPath;
-    private JButton btnAddStrPath;
-    private JButton btnLoadResource;
-    private JButton btnImportXls;
-    private JButton btnImportXml;
-    private JButton btnExport;
-    private JButton btnSelectOutput;
-
-    private JComboBox<Language> comboLanguage;
-    private JList<StringPath> list;
-    private DefaultListModel<StringPath> listModel = new DefaultListModel<>();
-
     private JTextField txtStrPath;
     private JTextField txtSelectOutputPath;
+    private DefaultListModel<StringPath> listModel = new DefaultListModel<>();
 
     private StResManager manager = new StResManager();
 
 
-    /** main view **/
+    /**
+     * main view
+     */
     public MainView() {
         // setting
         super("StrResParser");
@@ -51,9 +42,23 @@ public class MainView extends JFrame {
     }
 
     private void init() {
+        //if need
     }
 
+    /**
+     * UI init
+     */
     private void initUI() {
+        JButton btnSelectStrPath;
+        JButton btnAddStrPath;
+        JButton btnLoadResource;
+        JButton btnImportXls;
+        JButton btnImportXml;
+        JButton btnExport;
+        JButton btnSelectOutput;
+        final JComboBox<Language> comboLanguage = new JComboBox<>(Language.values());
+        final JList<StringPath> list = new JList<>(listModel);
+
         JPanel container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
         container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -61,7 +66,6 @@ public class MainView extends JFrame {
 
         JLabel label;
         JPanel panel, subPanel;
-        Dimension dimLabel = new Dimension(160, 30);
 
         ////////// [String Resource Picker]
         label = new JLabel("문자열 리소스 경로 설정"); //label.setPreferredSize(dimLabel);
@@ -79,10 +83,8 @@ public class MainView extends JFrame {
                 super.mousePressed(e);
             }
         };
-        list = new JList<>(listModel);
         list.setVisibleRowCount(10);
         list.addMouseListener(mouseListener);
-        comboLanguage = new JComboBox<>(Language.values());
         txtStrPath = new JTextField(20);
         btnSelectStrPath = new JButton("리소스 경로 지정");
         btnSelectStrPath.addActionListener(e -> {
@@ -178,6 +180,9 @@ public class MainView extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * set location center
+     */
     private void setLocationCenter() {
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         setLocation((dim.width/2)-(getWidth()/2), (dim.height/2)-(getHeight()/2));
@@ -185,9 +190,9 @@ public class MainView extends JFrame {
 
     /**
      * 문자열 리소스 경로 추가
-     * @param language
-     * @param source
-     * @throws Exception
+     * @param language language instance
+     * @param source string resource directory path
+     * @throws Exception error message
      */
     private boolean addStrPathItem(Language language, String source) throws Exception {
         if (language == null) {
@@ -204,7 +209,11 @@ public class MainView extends JFrame {
         return true;
     }
 
-    /** browse File **/
+    /**
+     * browse File
+     * @return file path
+     * @throws Exception error message
+     */
     private String browseFile() throws Exception {
         String result = "";
 
@@ -221,7 +230,11 @@ public class MainView extends JFrame {
         return result;
     }
 
-    /** browse Directory **/
+    /**
+     * browse Directory
+     * @return folder path
+     * @throws Exception error message
+     */
     private String browseDirectory() throws Exception {
         String result = "";
 
@@ -241,6 +254,7 @@ public class MainView extends JFrame {
 
     /**
      * Resource Load
+     * @throws Exception error message
      */
     private void loadResources() throws Exception {
         //init resource path
@@ -259,6 +273,7 @@ public class MainView extends JFrame {
 
     /**
      * Write, platform string resources
+     * @throws Exception error message
      */
     private void writeResources() throws Exception {
         boolean result = manager.doWriteResources();
@@ -270,6 +285,8 @@ public class MainView extends JFrame {
 
     /**
      * update, string resource from xlsx file
+     * @param target xlsx file
+     * @throws Exception error message
      */
     private void importFromExcel(File target) throws Exception {
         manager.importFromExcel(target, true);
@@ -277,6 +294,9 @@ public class MainView extends JFrame {
 
     /**
      * export, updated union string resource to XML (fileName : makeUnionStResXml.xml)
+     * @param targetDir target
+     * @return isSuccess
+     * @throws Exception error message
      */
     private boolean makeUnionStResXml(File targetDir) throws Exception {
         String absoluteFilePath = targetDir.getAbsolutePath() + File.separator + "makeUnionStResXml.xml";
@@ -285,6 +305,9 @@ public class MainView extends JFrame {
 
     /**
      * export, updated union string resource to Excel (fileName : makeExcel.xlsx)
+     * @param targetDir target
+     * @return isSuccess
+     * @throws Exception error message
      */
     private boolean makeExcel(File targetDir) throws Exception {
         String absoluteFilePath = targetDir.getAbsolutePath() + File.separator + "makeExcel.xlsx";
@@ -360,6 +383,10 @@ public class MainView extends JFrame {
         }
     }
 
+    /**
+     * show message dialog
+     * @param message message
+     */
     private void showMessageDialog(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
