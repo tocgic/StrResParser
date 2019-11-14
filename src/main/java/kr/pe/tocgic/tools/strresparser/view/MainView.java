@@ -34,8 +34,6 @@ public class MainView extends JFrame {
 
     private void loadEnv() {
         try {
-            txtSelectOutputPath.setText("/Users/tocgic/Temp/strresparser");
-
         } catch (Exception e) {
             showMessageDialog(e.getMessage());
         }
