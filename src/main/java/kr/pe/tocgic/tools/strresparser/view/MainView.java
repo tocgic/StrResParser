@@ -12,7 +12,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.IOException;
 
 public class MainView extends JFrame {
     private JButton btnSelectStrPath;
@@ -63,7 +62,6 @@ public class MainView extends JFrame {
         JLabel label;
         JPanel panel, subPanel;
         Dimension dimLabel = new Dimension(160, 30);
-        Dimension dimButton = null; //new Dimension(200, 30);
 
         ////////// [String Resource Picker]
         label = new JLabel("문자열 리소스 경로 설정"); //label.setPreferredSize(dimLabel);
@@ -86,8 +84,7 @@ public class MainView extends JFrame {
         list.addMouseListener(mouseListener);
         comboLanguage = new JComboBox<>(Language.values());
         txtStrPath = new JTextField(20);
-        btnSelectStrPath = new JButton("찾기");
-        btnSelectStrPath.setMinimumSize(dimButton);
+        btnSelectStrPath = new JButton("리소스 경로 지정");
         btnSelectStrPath.addActionListener(e -> {
             try {
                 txtStrPath.setText(browseDirectory());
@@ -96,7 +93,6 @@ public class MainView extends JFrame {
             }
         });
         btnAddStrPath = new JButton("추가");
-        btnAddStrPath.setMinimumSize(dimButton);
         btnAddStrPath.addActionListener(e -> {
             try {
                 boolean result = addStrPathItem((Language)comboLanguage.getSelectedItem(), txtStrPath.getText());
@@ -108,7 +104,6 @@ public class MainView extends JFrame {
             }
         });
         btnLoadResource = new JButton("문자열 리소스 불러오기");
-        btnLoadResource.setMinimumSize(dimButton);
         btnLoadResource.addActionListener(e -> {
             try {
                 loadResources();
@@ -118,15 +113,15 @@ public class MainView extends JFrame {
         });
 
         panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        panel.setLayout(new BorderLayout(5, 5));
         panel.add(label, BorderLayout.NORTH);
         panel.add(comboLanguage, BorderLayout.WEST);
-        panel.add(txtStrPath, BorderLayout.CENTER);
         subPanel = new JPanel();
-        subPanel.setLayout(new FlowLayout());
-        subPanel.add(btnSelectStrPath);
-        subPanel.add(btnAddStrPath);
-        panel.add(subPanel, BorderLayout.EAST);
+        subPanel.setLayout(new BorderLayout(0, 0));
+        subPanel.add(txtStrPath, BorderLayout.CENTER);
+        subPanel.add(btnSelectStrPath, BorderLayout.EAST);
+        panel.add(subPanel, BorderLayout.CENTER);
+        panel.add(btnAddStrPath, BorderLayout.EAST);
         panel.add(new JScrollPane(list), BorderLayout.SOUTH);
         container.add(panel);
         subPanel = new JPanel();
@@ -137,13 +132,11 @@ public class MainView extends JFrame {
         ////////// [import xls, xml]
         label = new JLabel("데이터 가져오기 (xls 파일이나, xml 로 부터 데이터를 반영)"); //label.setPreferredSize(dimLabel);
         btnImportXls = new JButton("Import xls file");
-        btnImportXls.setMinimumSize(dimButton);
         btnImportXls.addActionListener(e -> doImportXls());
         btnImportXml = new JButton("Import XML file");
-        btnImportXml.setMinimumSize(dimButton);
         btnImportXml.addActionListener(e -> doImportXml());
         panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        panel.setLayout(new BorderLayout(5, 5));
         panel.add(label, BorderLayout.NORTH);
         subPanel = new JPanel();
         subPanel.setLayout(new FlowLayout());
@@ -154,12 +147,11 @@ public class MainView extends JFrame {
 
         ////////// [export xls, xml]
         panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        panel.setLayout(new BorderLayout(5, 5));
         label = new JLabel("데이터 내보내기 (xls, xml 로 데이터를 반영)"); //label.setPreferredSize(dimLabel);
         panel.add(label, BorderLayout.NORTH);
         txtSelectOutputPath = new JTextField(20);
         btnSelectOutput = new JButton("out 경로 지정");
-        btnSelectOutput.setMinimumSize(dimButton);
         btnSelectOutput.addActionListener(e -> {
             try {
                 txtSelectOutputPath.setText(browseDirectory());
@@ -168,23 +160,27 @@ public class MainView extends JFrame {
             }
         });
         btnExport = new JButton("Export");
-        btnExport.setMinimumSize(dimButton);
         btnExport.addActionListener(e -> doExport(txtSelectOutputPath.getText()));
-        panel.add(txtSelectOutputPath, BorderLayout.CENTER);
         subPanel = new JPanel();
-        subPanel.setLayout(new FlowLayout());
-        subPanel.add(btnSelectOutput);
-        subPanel.add(btnExport);
-        panel.add(subPanel, BorderLayout.EAST);
+        subPanel.setLayout(new BorderLayout(0, 0));
+        subPanel.add(txtSelectOutputPath, BorderLayout.CENTER);
+        subPanel.add(btnSelectOutput, BorderLayout.EAST);
+        panel.add(subPanel, BorderLayout.CENTER);
+        panel.add(btnExport, BorderLayout.EAST);
         container.add(panel);
 
 
-        Dimension dimFrame = new Dimension(660, 210);
+        Dimension dimFrame = new Dimension(800, 430);
         setSize(dimFrame);
         setMinimumSize(dimFrame);
         pack();
-        setLocation(800, 450);
+        setLocationCenter();
         setVisible(true);
+    }
+
+    private void setLocationCenter() {
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        setLocation((dim.width/2)-(getWidth()/2), (dim.height/2)-(getHeight()/2));
     }
 
     /**
