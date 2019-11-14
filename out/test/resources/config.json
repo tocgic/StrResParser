@@ -1,0 +1,29 @@
+{
+  "resources": [
+    {"language": "KO", "sourcePath": "/Users/tocgic/Temp/test/android/values-ko/"},
+    { "language": "EN", "sourcePath": "/Users/tocgic/Temp/test/android/values/"},
+    { "language": "JP", "sourcePath": "/Users/tocgic/Temp/test/android/values-ja/"}
+  ],
+  "export": {
+    "xml": {
+      "sourcePath": "/Users/tocgic/Temp/test/unionStRes.xml",
+      "overWrite": true
+    },
+    "excel": {
+      "sourcePath": "/Users/tocgic/Temp/test/unionStRes.xlsx",
+      "overWrite": true,
+      "columns": [
+        "HIDDEN_KEYS",
+        "LANGUAGE_KO",
+        "LANGUAGE_EN",
+        "LANGUAGE_JA"
+      ]
+    }
+  },
+  "import": {
+    "excel": {
+      "sourcePath": "/Users/tocgic/Temp/test/unionStRes_hiddenKeys_edit.xls",
+      "ignoreEmptyString": true
+    }
+  }
+}
