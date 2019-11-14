@@ -1,6 +1,6 @@
 package kr.pe.tocgic.tools;
 
-import kr.pe.tocgic.tools.data.ResourceModelList;
+import kr.pe.tocgic.tools.data.ResourceDataManager;
 import kr.pe.tocgic.tools.data.enums.ExportXlsColumn;
 import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.data.enums.Platform;
@@ -22,7 +22,7 @@ public class StResManager {
 
     private List<SourceDirInfo> sourceDirInfoList;
     private IResourceString[] resourceFileParser;
-    private ResourceModelList resourceModelList;
+    private ResourceDataManager resourceDataManager;
 
     class SourceDirInfo {
         Language language;
@@ -40,7 +40,7 @@ public class StResManager {
         resourceFileParser[Platform.ANDROID.ordinal()] = new AndroidXml();
         resourceFileParser[Platform.IOS.ordinal()] = new IOSStrings();
 
-        resourceModelList = new ResourceModelList();
+        resourceDataManager = new ResourceDataManager();
     }
 
     /**
@@ -65,15 +65,13 @@ public class StResManager {
      * @return
      */
     public boolean importPlatformResources() {
-        resourceModelList.clear();
+        resourceDataManager.clear();
 
         for (SourceDirInfo sourceDirInfo : sourceDirInfoList) {
             if (sourceDirInfo.language != null && sourceDirInfo.dir != null) {
-                loadResourceFile(resourceModelList, sourceDirInfo.language, sourceDirInfo.dir);
+                loadResourceFile(resourceDataManager, sourceDirInfo.language, sourceDirInfo.dir);
             }
         }
-
-        resourceModelList.sortByValue(Language.KO, true);
         return true;
     }
 
@@ -97,7 +95,7 @@ public class StResManager {
             }
         }
         UnionStResXml unionStResXml = new UnionStResXml();
-        boolean result = unionStResXml.exportFile(resourceModelList, target);
+        boolean result = unionStResXml.exportFile(resourceDataManager, target);
         Logger.i(TAG, "make UnionStResXml(" + target.getAbsolutePath()+ ") result : " + result);
         return result;
     }
@@ -126,7 +124,7 @@ public class StResManager {
             columns = ExportXlsColumn.values();
         }
         UnionStResExcel unionStResExcel = new UnionStResExcel(columns);
-        boolean result = unionStResExcel.exportFile(resourceModelList, target);
+        boolean result = unionStResExcel.exportFile(resourceDataManager, target);
         Logger.i(TAG, "make UnionStResExcel(" + target.getAbsolutePath()+ ") result : " + result);
         return result;
     }
@@ -142,24 +140,24 @@ public class StResManager {
             return false;
         }
         UnionStResExcel unionStResExcel = new UnionStResExcel(null);
-        boolean result = unionStResExcel.importFile(source, resourceModelList);
+        boolean result = unionStResExcel.importFile(source, resourceDataManager);
         Logger.i(TAG, "import UnionStResExcel(" + source.getAbsolutePath()+ ") result : " + result);
         return result;
     }
 
     /**
      * Platform 별 String Resource 파일을 load & parse 하여, resourceModeList 에 추가 한다.
-     * @param resourceModelList
+     * @param resourceDataManager
      * @param language
      * @param file
      */
-    private void loadResourceFile(ResourceModelList resourceModelList, Language language, File file) {
+    private void loadResourceFile(ResourceDataManager resourceDataManager, Language language, File file) {
         if (file != null) {
             if (file.isDirectory()) {
                 File[] files = file.listFiles();
                 if (files != null) {
                     for (File childFile : files) {
-                        loadResourceFile(resourceModelList, language, childFile);
+                        loadResourceFile(resourceDataManager, language, childFile);
                     }
                 }
             } else {
@@ -167,7 +165,7 @@ public class StResManager {
                     IResourceString parser = resourceFileParser[platform.ordinal()];
                     if (parser != null) {
                         if (parser.isSupportFileType(file)) {
-                            resourceModelList.addItems(platform, language, parser.getKeyValueMap(file));
+                            resourceDataManager.addItems(platform, language, parser.getKeyValueMap(file));
                         }
                     }
                 }

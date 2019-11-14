@@ -17,16 +17,12 @@ public class ResourceModel {
     private static final String TAG = ResourceModel.class.getSimpleName();
 
     Map<Platform, List<String>> keyMap = new HashMap<>();
-    Map<Language, String> valueMap = new HashMap<>();
+    LanguageModel valueMap = new LanguageModel();
 
     private ResourceModel() {}
 
-    public ResourceModel(Language language, String value) {
-        setValue(language, value);
-    }
-
-    public ResourceModel(Platform platform, Language language, String key, String value) {
-        this(language, value);
+    public ResourceModel(Platform platform, String key, LanguageModel languageModel) {
+        setValue(languageModel);
         addKey(platform, key);
     }
 
@@ -59,24 +55,18 @@ public class ResourceModel {
     }
 
     public void setValue(Language language, String value) {
-        valueMap.put(language, value);
+        valueMap.setValue(language, value);
+    }
+
+    public void setValue(LanguageModel languageModel) {
+        this.valueMap = languageModel;
     }
 
     public String getValue(Language language) {
-        return valueMap.get(language);
+        return valueMap.getValue(language);
     }
 
-    public boolean hasLanguage(Language language) {
-        return valueMap.containsKey(language);
-    }
-
-    public ResourceModel newValueInstance() {
-        ResourceModel newInstance = new ResourceModel();
-        for (Language language : valueMap.keySet()) {
-            if (valueMap.containsKey(language)) {
-                newInstance.setValue(language, valueMap.get(language));
-            }
-        }
-        return newInstance;
+    public LanguageModel getLanguageModel() {
+        return valueMap;
     }
 }

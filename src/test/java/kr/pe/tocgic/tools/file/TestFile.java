@@ -1,7 +1,7 @@
 package kr.pe.tocgic.tools.file;
 
 import kr.pe.tocgic.tools.StResManager;
-import kr.pe.tocgic.tools.data.ResourceModelList;
+import kr.pe.tocgic.tools.data.ResourceDataManager;
 import kr.pe.tocgic.tools.data.enums.ExportXlsColumn;
 import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.data.enums.Platform;
@@ -36,7 +36,7 @@ public class TestFile {
         }
     }
 
-    void makeTotalStResXml(ResourceModelList data, String targetFileFullPath) {
+    void makeTotalStResXml(ResourceDataManager data, String targetFileFullPath) {
 
         UnionStResXml unionStResXml = new UnionStResXml();
         File target = new File(targetFileFullPath);
@@ -49,7 +49,7 @@ public class TestFile {
 
     @Test
     public void test() {
-        ResourceModelList resourceModelList = new ResourceModelList();
+        ResourceDataManager resourceDataManager = new ResourceDataManager();
 
         Map<String, String> map;
 //        map = androidXml("/Users/tocgic/Documents/_Temp/agent-string-resources/Android/strings.xml");
@@ -57,11 +57,11 @@ public class TestFile {
 //        resourceModelList.addItems(Platform.ANDROID, Language.KO, map);
         map = iOSStrings("/Users/tocgic/Documents/_Temp/agent-string-resources/iOS/Localizable.strings");
         printMap(map);
-        resourceModelList.addItems(Platform.IOS, Language.KO, map);
+        resourceDataManager.addItems(Platform.IOS, Language.KO, map);
 //
-//        resourceModelList.sortByValue(Language.KO, true);
+//        resourceDataManager.sortByValue(Language.KO, true);
 //
-//        makeTotalStResXml(resourceModelList, "/Users/tocgic/Documents/_Temp/agent-string-resources/totalStRes.xml");
+//        makeTotalStResXml(resourceDataManager, "/Users/tocgic/Documents/_Temp/agent-string-resources/totalStRes.xml");
     }
 
     @Test
@@ -75,10 +75,23 @@ public class TestFile {
         manager.importPlatformResources();
 
         //export, union string resource
-        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/test/unionStRes.xml"), true);
-        manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStRes.xlsx"), true, null);
+        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/unionStRes.xml"), true);
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStRes.xlsx"), true, null);
         ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
-        manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStResOnlyString.xlsx"), true, columns);
+        manager.makeExcel(new File("/Users/tocgic/Temp/unionStResOnlyString.xlsx"), true, columns);
+
+
+//        //import, platform string resources
+//        manager.setImportResourceDirectory(Language.KO, "/Users/tocgic/Temp/test/android/values-ko/");
+//        manager.setImportResourceDirectory(Language.EN, "/Users/tocgic/Temp/test/android/values/");
+//        manager.setImportResourceDirectory(Language.JA, "/Users/tocgic/Temp/test/android/values-ja/");
+//        manager.importPlatformResources();
+//
+//        //export, union string resource
+//        manager.makeUnionStResXml(new File("/Users/tocgic/Temp/test/unionStRes.xml"), true);
+//        manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStRes.xlsx"), true, null);
+//        ExportXlsColumn[] columns = {ExportXlsColumn.LANGUAGE_KO, ExportXlsColumn.LANGUAGE_JA, ExportXlsColumn.LANGUAGE_EN};
+//        manager.makeExcel(new File("/Users/tocgic/Temp/test/unionStResOnlyString.xlsx"), true, columns);
     }
 
     @Test

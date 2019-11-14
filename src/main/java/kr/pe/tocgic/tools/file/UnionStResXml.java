@@ -1,7 +1,7 @@
 package kr.pe.tocgic.tools.file;
 
+import kr.pe.tocgic.tools.data.ResourceDataManager;
 import kr.pe.tocgic.tools.data.ResourceModel;
-import kr.pe.tocgic.tools.data.ResourceModelList;
 import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.data.enums.Platform;
 import kr.pe.tocgic.tools.functions.IResourceTransform;
@@ -46,7 +46,7 @@ public class UnionStResXml implements IResourceTransform {
     private static final String ATTR_PLATFORM = "platform";
 
     @Override
-    public boolean exportFile(ResourceModelList source, File target) {
+    public boolean exportFile(ResourceDataManager source, File target) {
         if (target == null || target.isDirectory()) {
             return false;
         }
@@ -104,7 +104,7 @@ public class UnionStResXml implements IResourceTransform {
     }
 
     @Override
-    public boolean importFile(File source, ResourceModelList target) {
+    public boolean importFile(File source, ResourceDataManager target) {
         return false;
     }
 

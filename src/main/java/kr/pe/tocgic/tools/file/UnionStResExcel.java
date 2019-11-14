@@ -1,7 +1,7 @@
 package kr.pe.tocgic.tools.file;
 
+import kr.pe.tocgic.tools.data.ResourceDataManager;
 import kr.pe.tocgic.tools.data.ResourceModel;
-import kr.pe.tocgic.tools.data.ResourceModelList;
 import kr.pe.tocgic.tools.data.enums.ExportXlsColumn;
 import kr.pe.tocgic.tools.data.enums.Language;
 import kr.pe.tocgic.tools.data.enums.Platform;
@@ -41,7 +41,7 @@ public class UnionStResExcel implements IResourceTransform {
     }
 
     @Override
-    public boolean exportFile(ResourceModelList source, File target) {
+    public boolean exportFile(ResourceDataManager source, File target) {
         if (source == null) {
             Logger.e(TAG, "exportFile() Fail. source is null.");
             return false;
@@ -207,7 +207,7 @@ public class UnionStResExcel implements IResourceTransform {
     }
 
     @Override
-    public boolean importFile(File source, ResourceModelList target) {
+    public boolean importFile(File source, ResourceDataManager target) {
         FileInputStream fis = null;
         Workbook workbook = null;
 
@@ -269,7 +269,7 @@ public class UnionStResExcel implements IResourceTransform {
                         String langValue = langCell != null ? langCell.getStringCellValue() : "";
                         boolean updateResult = target.updateValue(langDefault, langDefValue, language, langValue);
                         if (!updateResult) {
-                            Logger.w(TAG, "ResourceModelList.updateValue() Fail. "+langDefValue+"["+langDefault+"], "+langValue+"["+language+"]");
+                            Logger.w(TAG, "ResourceDataManager.updateValue() Fail. "+langDefValue+"["+langDefault+"], "+langValue+"["+language+"]");
                         }
                     }
                 }
