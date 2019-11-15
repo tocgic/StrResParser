@@ -24,6 +24,10 @@ public class MainView extends JFrame {
 
     private StResManager manager = new StResManager();
 
+    private String selectHistoryStrPath;
+    private String selectHistoryOutPath;
+    private String selectHistoryImportFilePath;
+
 
     /**
      * main view
@@ -88,6 +92,10 @@ public class MainView extends JFrame {
                     if (input == JOptionPane.OK_OPTION) {
                         if (envProperty.removeStrPathItem(selectedItem)) {
                             listModel.remove(selectedIndex);
+
+                            //제거된 아이템 정보 추가 영역으로 이동 (사용자 편의고려)
+                            comboLanguage.setSelectedIndex(selectedItem.getLanguage().ordinal());
+                            txtStrPath.setText(selectedItem.getPath());
                         }
                     }
                 }
@@ -99,7 +107,12 @@ public class MainView extends JFrame {
         btnSelectStrPath = new JButton("리소스 경로 지정");
         btnSelectStrPath.addActionListener(e -> {
             try {
-                txtStrPath.setText(browseDirectory());
+                //사용자 입력 우선
+                if (StringUtil.isNotEmpty(txtStrPath.getText())) {
+                    selectHistoryStrPath = txtStrPath.getText();
+                }
+                selectHistoryStrPath = browseDirectory(selectHistoryStrPath);
+                txtStrPath.setText(selectHistoryStrPath);
             } catch (Exception e1) {
                 showMessageDialog(e1.getMessage());
             }
@@ -165,7 +178,12 @@ public class MainView extends JFrame {
         btnSelectOutput = new JButton("out 경로 지정");
         btnSelectOutput.addActionListener(e -> {
             try {
-                envProperty.setOutPath(browseDirectory());
+                //사용자 입력 우선
+                if (StringUtil.isNotEmpty(txtSelectOutputPath.getText())) {
+                    selectHistoryOutPath = txtSelectOutputPath.getText();
+                }
+                selectHistoryOutPath = browseDirectory(selectHistoryOutPath);
+                envProperty.setOutPath(selectHistoryOutPath);
                 txtSelectOutputPath.setText(envProperty.getOutPath());
             } catch (Exception e1) {
                 showMessageDialog(e1.getMessage());
@@ -229,14 +247,21 @@ public class MainView extends JFrame {
 
     /**
      * browse File
+     * @param currentPath 현재 위치
      * @return file path
      * @throws Exception error message
      */
-    private String browseFile() throws Exception {
+    private String browseFile(String currentPath) throws Exception {
         String result = "";
 
         JFileChooser c = new JFileChooser();
         c.setDialogTitle("Select file");
+        if (StringUtil.isNotEmpty(currentPath)) {
+            File current = new File(currentPath);
+            if (current.exists()) {
+                c.setCurrentDirectory(current);
+            }
+        }
 
         int rVal = c.showOpenDialog(MainView.this);
         if (rVal == JFileChooser.APPROVE_OPTION) {
@@ -250,15 +275,22 @@ public class MainView extends JFrame {
 
     /**
      * browse Directory
+     * @param currentPath 현재 위치
      * @return folder path
      * @throws Exception error message
      */
-    private String browseDirectory() throws Exception {
+    private String browseDirectory(String currentPath) throws Exception {
         String result = "";
 
         JFileChooser c = new JFileChooser();
         c.setDialogTitle("Select Directory");
         c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if (StringUtil.isNotEmpty(currentPath)) {
+            File current = new File(currentPath);
+            if (current.exists()) {
+                c.setCurrentDirectory(current);
+            }
+        }
 
         int rVal = c.showOpenDialog(MainView.this);
         if (rVal == JFileChooser.APPROVE_OPTION) {
@@ -378,7 +410,8 @@ public class MainView extends JFrame {
     private void doImportXls() {
         try {
             //파일 선택
-            String sourcePath = browseFile();
+            selectHistoryImportFilePath = browseFile(selectHistoryImportFilePath);
+            String sourcePath = selectHistoryImportFilePath;
             if (StringUtil.isEmpty(sourcePath)) {
                 throw new Exception("xls 경로가 지정되지 않았습니다.");
             }
