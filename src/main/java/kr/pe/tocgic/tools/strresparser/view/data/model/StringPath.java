@@ -1,4 +1,4 @@
-package kr.pe.tocgic.tools.strresparser.view.model;
+package kr.pe.tocgic.tools.strresparser.view.data.model;
 
 import kr.pe.tocgic.tools.strresparser.data.enums.Language;
 
@@ -26,5 +26,13 @@ public class StringPath {
     @Override
     public String toString() {
         return "Lan:" + getLanguageValue() + "\t" + getPath();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof StringPath) {
+            return toString().equals(obj.toString());
+        }
+        return super.equals(obj);
     }
 }

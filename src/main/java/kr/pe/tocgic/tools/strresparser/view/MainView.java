@@ -4,7 +4,8 @@ import kr.pe.tocgic.tools.strresparser.StResManager;
 import kr.pe.tocgic.tools.strresparser.data.enums.ExportXlsColumn;
 import kr.pe.tocgic.tools.strresparser.data.enums.Language;
 import kr.pe.tocgic.tools.strresparser.util.StringUtil;
-import kr.pe.tocgic.tools.strresparser.view.model.StringPath;
+import kr.pe.tocgic.tools.strresparser.view.data.EnvProperty;
+import kr.pe.tocgic.tools.strresparser.view.data.model.StringPath;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,35 +13,48 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.List;
 
 public class MainView extends JFrame {
     private JTextField txtStrPath;
     private JTextField txtSelectOutputPath;
-    private DefaultListModel<StringPath> listModel = new DefaultListModel<>();
+    private DefaultListModel<StringPath> listModel;
+
+    private EnvProperty envProperty;
 
     private StResManager manager = new StResManager();
+
+    private String selectHistoryStrPath;
+    private String selectHistoryOutPath;
+    private String selectHistoryImportFilePath;
 
 
     /**
      * main view
      */
     public MainView() {
-        // setting
         super("StrResParser");
+        // setting
         init();
         initUI();
+    }
+
+    private void init() {
+        envProperty = new EnvProperty();
+        listModel = new DefaultListModel<>();
+
+        txtStrPath = new JTextField(20);
+        txtSelectOutputPath = new JTextField(20);
+
         loadEnv();
     }
 
     private void loadEnv() {
-        try {
-        } catch (Exception e) {
-            showMessageDialog(e.getMessage());
+        txtSelectOutputPath.setText(envProperty.getOutPath());
+        List<StringPath> list = envProperty.getStringPaths();
+        for (StringPath item : list) {
+            addListModel(item);
         }
-    }
-
-    private void init() {
-        //if need
     }
 
     /**
@@ -73,9 +87,16 @@ public class MainView extends JFrame {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     int selectedIndex = list.locationToIndex(e.getPoint());
                     ListModel<StringPath> model = list.getModel();
-                    int input = JOptionPane.showConfirmDialog(container, String.format("선택된 아이템을 삭제할까요?\n%s", model.getElementAt(selectedIndex)));
+                    StringPath selectedItem = model.getElementAt(selectedIndex);
+                    int input = JOptionPane.showConfirmDialog(container, String.format("선택된 아이템을 삭제할까요?\n%s", selectedItem));
                     if (input == JOptionPane.OK_OPTION) {
-                        listModel.remove(selectedIndex);
+                        if (envProperty.removeStrPathItem(selectedItem)) {
+                            listModel.remove(selectedIndex);
+
+                            //제거된 아이템 정보 추가 영역으로 이동 (사용자 편의고려)
+                            comboLanguage.setSelectedIndex(selectedItem.getLanguage().ordinal());
+                            txtStrPath.setText(selectedItem.getPath());
+                        }
                     }
                 }
                 super.mousePressed(e);
@@ -83,11 +104,15 @@ public class MainView extends JFrame {
         };
         list.setVisibleRowCount(10);
         list.addMouseListener(mouseListener);
-        txtStrPath = new JTextField(20);
         btnSelectStrPath = new JButton("리소스 경로 지정");
         btnSelectStrPath.addActionListener(e -> {
             try {
-                txtStrPath.setText(browseDirectory());
+                //사용자 입력 우선
+                if (StringUtil.isNotEmpty(txtStrPath.getText())) {
+                    selectHistoryStrPath = txtStrPath.getText();
+                }
+                selectHistoryStrPath = browseDirectory(selectHistoryStrPath);
+                txtStrPath.setText(selectHistoryStrPath);
             } catch (Exception e1) {
                 showMessageDialog(e1.getMessage());
             }
@@ -150,11 +175,16 @@ public class MainView extends JFrame {
         panel.setLayout(new BorderLayout(5, 5));
         label = new JLabel("데이터 내보내기 (xls, xml 로 데이터를 반영)"); //label.setPreferredSize(dimLabel);
         panel.add(label, BorderLayout.NORTH);
-        txtSelectOutputPath = new JTextField(20);
         btnSelectOutput = new JButton("out 경로 지정");
         btnSelectOutput.addActionListener(e -> {
             try {
-                txtSelectOutputPath.setText(browseDirectory());
+                //사용자 입력 우선
+                if (StringUtil.isNotEmpty(txtSelectOutputPath.getText())) {
+                    selectHistoryOutPath = txtSelectOutputPath.getText();
+                }
+                selectHistoryOutPath = browseDirectory(selectHistoryOutPath);
+                envProperty.setOutPath(selectHistoryOutPath);
+                txtSelectOutputPath.setText(envProperty.getOutPath());
             } catch (Exception e1) {
                 showMessageDialog(e1.getMessage());
             }
@@ -203,20 +233,35 @@ public class MainView extends JFrame {
         if (!file.exists() || !file.canWrite() || !file.canRead()) {
             throw new Exception(String.format("대상 경로가 없거나, (읽기/쓰기)권한이 없습니다. [%s]", source));
         }
-        listModel.addElement(new StringPath(language, source));
-        return true;
+        StringPath item = new StringPath(language, source);
+        if (envProperty.addStrPathItem(item)) {
+            addListModel(item);
+            return true;
+        }
+        return false;
+    }
+
+    private void addListModel(StringPath item) {
+        listModel.addElement(item);
     }
 
     /**
      * browse File
+     * @param currentPath 현재 위치
      * @return file path
      * @throws Exception error message
      */
-    private String browseFile() throws Exception {
+    private String browseFile(String currentPath) throws Exception {
         String result = "";
 
         JFileChooser c = new JFileChooser();
         c.setDialogTitle("Select file");
+        if (StringUtil.isNotEmpty(currentPath)) {
+            File current = new File(currentPath);
+            if (current.exists()) {
+                c.setCurrentDirectory(current);
+            }
+        }
 
         int rVal = c.showOpenDialog(MainView.this);
         if (rVal == JFileChooser.APPROVE_OPTION) {
@@ -230,15 +275,22 @@ public class MainView extends JFrame {
 
     /**
      * browse Directory
+     * @param currentPath 현재 위치
      * @return folder path
      * @throws Exception error message
      */
-    private String browseDirectory() throws Exception {
+    private String browseDirectory(String currentPath) throws Exception {
         String result = "";
 
         JFileChooser c = new JFileChooser();
         c.setDialogTitle("Select Directory");
         c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if (StringUtil.isNotEmpty(currentPath)) {
+            File current = new File(currentPath);
+            if (current.exists()) {
+                c.setCurrentDirectory(current);
+            }
+        }
 
         int rVal = c.showOpenDialog(MainView.this);
         if (rVal == JFileChooser.APPROVE_OPTION) {
@@ -257,9 +309,8 @@ public class MainView extends JFrame {
     private void loadResources() throws Exception {
         //init resource path
         manager.clearSourceDirInfoList();
-        int size = listModel.getSize();
-        for (int i = 0; i < size; i++) {
-            StringPath item = listModel.get(i);
+        List<StringPath> list = envProperty.getStringPaths();
+        for (StringPath item : list) {
             manager.addResourcePath(item.getLanguage(), item.getPath());
         }
 
@@ -359,7 +410,8 @@ public class MainView extends JFrame {
     private void doImportXls() {
         try {
             //파일 선택
-            String sourcePath = browseFile();
+            selectHistoryImportFilePath = browseFile(selectHistoryImportFilePath);
+            String sourcePath = selectHistoryImportFilePath;
             if (StringUtil.isEmpty(sourcePath)) {
                 throw new Exception("xls 경로가 지정되지 않았습니다.");
             }
