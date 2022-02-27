@@ -4,6 +4,7 @@ import kr.pe.tocgic.tools.strresparser.data.ResourceDataManager;
 import kr.pe.tocgic.tools.strresparser.data.enums.ExportXlsColumn;
 import kr.pe.tocgic.tools.strresparser.data.enums.Language;
 import kr.pe.tocgic.tools.strresparser.data.enums.Platform;
+import kr.pe.tocgic.tools.strresparser.file.AndroidTemplateRefStringXml;
 import kr.pe.tocgic.tools.strresparser.file.UnionStResExcel;
 import kr.pe.tocgic.tools.strresparser.file.UnionStResXml;
 import kr.pe.tocgic.tools.strresparser.file.platform.AndroidStringXml;
@@ -14,6 +15,7 @@ import kr.pe.tocgic.tools.strresparser.functions.IResourceString;
 import kr.pe.tocgic.tools.strresparser.util.Logger;
 import kr.pe.tocgic.tools.strresparser.util.StringUtil;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +85,27 @@ public class StResManager {
      */
     public boolean doWriteResources() {
         return loadResources(false);
+    }
+
+    /**
+     * template_ 리소스를 참조하는 리소스 파일 생성
+     * @return
+     */
+    public boolean doGenAndroidTemplateRef(@Nonnull String fileName) throws Exception {
+        File destFile = null;
+        for (SourceDirInfo sourceDirInfo : sourceDirInfoList) {
+            if (sourceDirInfo.language == Language.EN && sourceDirInfo.dir != null) {
+                destFile = new File(sourceDirInfo.dir.getAbsolutePath(), fileName);
+            }
+        }
+        if (destFile != null) {
+            List<String> keyList = resourceDataManager.getResourceKeyList(Platform.ANDROID);
+            if (keyList.size() > 0) {
+                AndroidTemplateRefStringXml templateRefStringXml = new AndroidTemplateRefStringXml(destFile);
+                templateRefStringXml.generate(keyList);
+            }
+        }
+        return true;
     }
 
     /**

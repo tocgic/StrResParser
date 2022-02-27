@@ -5,6 +5,7 @@ import kr.pe.tocgic.tools.strresparser.data.enums.Platform;
 import kr.pe.tocgic.tools.strresparser.util.Logger;
 import kr.pe.tocgic.tools.strresparser.util.StringUtil;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 public class ResourceDataManager {
@@ -20,6 +21,7 @@ public class ResourceDataManager {
         platformMapMap.clear();
     }
 
+    @Nonnull
     public Map<String, LanguageModel> getLanguageMap(Platform platform) {
         Map<String, LanguageModel> map = platformMapMap.get(platform);
         if (map == null) {
@@ -78,6 +80,16 @@ public class ResourceDataManager {
         merge(resourceModelList);
         sortByValue(resourceModelList, Language.KO, true);
         return resourceModelList;
+    }
+
+    /**
+     * platform 에 대한 string 리소스 key 목록 반환
+     * @return list
+     */
+    @Nonnull
+    public List<String> getResourceKeyList(Platform platform) {
+        Map<String, LanguageModel> languageMap = getLanguageMap(platform);
+        return new ArrayList<>(languageMap.keySet());
     }
 
     /**
