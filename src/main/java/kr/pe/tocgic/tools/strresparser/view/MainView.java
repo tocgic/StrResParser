@@ -68,6 +68,7 @@ public class MainView extends JFrame {
         JButton btnImportXml;
         JButton btnExport;
         JButton btnSelectOutput;
+        JButton btnGenTemplateRef;
         final JComboBox<Language> comboLanguage = new JComboBox<>(Language.values());
         final JList<StringPath> list = new JList<>(listModel);
 
@@ -199,6 +200,16 @@ public class MainView extends JFrame {
         panel.add(btnExport, BorderLayout.EAST);
         container.add(panel);
 
+        ////////// [export strings_template_ref.xml]
+        panel = new JPanel();
+        panel.setLayout(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        label = new JLabel("[ANDROID] - com.likethesalad.android:string-reference:1.3.0");
+        panel.add(label, BorderLayout.NORTH);
+        btnGenTemplateRef = new JButton("src/main/res/values/strings_template_ref.xml 생성");
+        btnGenTemplateRef.addActionListener(e -> doGenAndroidTemplateRef());
+        panel.add(btnGenTemplateRef, BorderLayout.EAST);
+        container.add(panel);
 
         Dimension dimFrame = new Dimension(800, 430);
         setSize(dimFrame);
@@ -365,6 +376,14 @@ public class MainView extends JFrame {
     }
 
     /**
+     * Write, platform string resources
+     * @throws Exception error message
+     */
+    private void genAndroidTemplateRef() throws Exception {
+        manager.doGenAndroidTemplateRef("strings_template_ref.xml");
+    }
+
+    /**
      * Export
      * 파일 검증 > xls, xml 파일 생성
      * @param targetPath out directory path
@@ -428,6 +447,23 @@ public class MainView extends JFrame {
 
             //리소스 반영
             writeResources();
+        } catch (Exception e) {
+            showMessageDialog(e.getMessage());
+        }
+    }
+
+    /**
+     * strings_template_ref.xml 생성
+     * 경로 : src/main/res/values/strings_template_ref.xml
+     * 문자열 리소스 불러오기 > strings_template_ref.xml 생성
+     */
+    private void doGenAndroidTemplateRef() {
+        try {
+            //리소스 로드
+            loadResources();
+
+            //string_template_ref.xml 생성
+            genAndroidTemplateRef();
         } catch (Exception e) {
             showMessageDialog(e.getMessage());
         }
