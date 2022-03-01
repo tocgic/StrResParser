@@ -238,7 +238,20 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
                                 //Logger.v(TAG, "StringNode : " + node);
                                 if (node != null) {
                                     LanguageModel languageModel = sourceMap.get(node.key);
-                                    if (languageModel != null && languageModel.hasDifferentValue(language, replaceCommonExpression(true, node.value))) {
+                                    boolean isContainPlaceHolder = false;
+
+                                    // [template_] 한국어를 기준으로, template_ key 적용을 위한 추가코드
+                                    String newKoValue = languageModel != null ? languageModel.getValue(Language.KO, "") : "";
+                                    if (newKoValue.length() < 1) {
+                                        LanguageModel languageModel1 = sourceMap.get("template_" + node.key);
+                                        if (languageModel1 != null) {
+                                            languageModel = languageModel1;
+                                            newKoValue = languageModel1.getValue(Language.KO, "");
+                                        }
+                                    }
+                                    isContainPlaceHolder = newKoValue.contains("${");
+
+                                    if (languageModel != null && (languageModel.hasDifferentValue(language, replaceCommonExpression(true, node.value)) || isContainPlaceHolder)) {
                                         String newValue = replaceCommonExpression(false, languageModel.getValue(language, null));
                                         Logger.v(TAG, "update [" + node.key + "] " + node.value + " >>>> " + newValue);
 
@@ -251,6 +264,15 @@ public class AndroidStringXml extends BaseStringResFile implements IResourceStri
                                             } else {
                                                 keyString = tagItem.substring(0, stringTagEndIndex + 1);
                                             }
+
+                                            // [template_] key 에 template_ 적용하기 위한 코드. value 는 변경하지 않고 그대로 사용
+                                            if (isContainPlaceHolder) {
+                                                if (!keyString.contains("name=\"template_")) {
+                                                    keyString = keyString.replace("name=\"", "name=\"template_");
+                                                }
+                                            }
+                                            newValue = node.value; // value 는 변경하지 않고 그대로 사용
+
                                             buffer.setLength(0);
                                             buffer.append(keyString);
                                             buffer.append(newValue);
