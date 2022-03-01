@@ -1,5 +1,6 @@
 package kr.pe.tocgic.tools.strresparser;
 
+import kr.pe.tocgic.tools.strresparser.data.LanguageModel;
 import kr.pe.tocgic.tools.strresparser.data.ResourceDataManager;
 import kr.pe.tocgic.tools.strresparser.data.enums.ExportXlsColumn;
 import kr.pe.tocgic.tools.strresparser.data.enums.Language;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StResManager {
     private static final String TAG = StResManager.class.getSimpleName();
@@ -101,6 +103,25 @@ public class StResManager {
         if (destFile != null) {
             List<String> keyList = resourceDataManager.getResourceKeyList(Platform.ANDROID);
             if (keyList.size() > 0) {
+
+                // [template_] EN 에 ${} 를 사용하지 않으면서, template_ id 로 시작 하는 ID 목록 출력
+                List<String> notContainKeys = new ArrayList<>();
+                List<String> templatedKeyList = keyList.stream().filter(key -> key.startsWith("template_")).sorted().collect(Collectors.toList());
+
+                Map<String, LanguageModel> map = resourceDataManager.getLanguageMap(Platform.ANDROID);
+                for (String key : templatedKeyList) {
+                    LanguageModel languageModel = map.get(key);
+                    if (languageModel != null) {
+                        String enValue = languageModel.getValue(Language.EN);
+                        if (enValue != null) {
+                            if (!enValue.contains("${")) {
+                                notContainKeys.add(key);
+                                Logger.i(TAG, "notReferId : " + key);
+                            }
+                        }
+                    }
+                }
+
                 AndroidTemplateRefStringXml templateRefStringXml = new AndroidTemplateRefStringXml(destFile);
                 templateRefStringXml.generate(keyList);
             }
