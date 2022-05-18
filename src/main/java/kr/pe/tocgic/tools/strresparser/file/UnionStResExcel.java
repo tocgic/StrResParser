@@ -357,12 +357,17 @@ public class UnionStResExcel implements IResourceTransform {
                 Logger.e(TAG, "importFile() Fail. sheet size 0.");
                 return false;
             }
-
-            int sheetIndex = 0;
+            int sheetIndex = workbook.getSheetIndex(sheetName);
+            if (sheetIndex < 0) {
+                Logger.e(TAG, "importFile() Fail. sheet '" + sheetName + "' not found.");
+                return false;
+            }
             if (workbook instanceof HSSFWorkbook) {
-                curSheet = ((HSSFWorkbook)workbook).getSheetAt(sheetIndex);
+                HSSFWorkbook hssfWorkbook = ((HSSFWorkbook)workbook);
+                curSheet = hssfWorkbook.getSheetAt(sheetIndex);
             } else {
-                curSheet = ((XSSFWorkbook)workbook).getSheetAt(sheetIndex);
+                XSSFWorkbook xssfWorkbook = ((XSSFWorkbook)workbook);
+                curSheet = xssfWorkbook.getSheetAt(sheetIndex);
             }
             if (curSheet == null) {
                 Logger.e(TAG, "importFile() Fail. sheet not exist.");
